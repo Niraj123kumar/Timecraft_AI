@@ -17,11 +17,11 @@ const FormSection = ({ title, icon: Icon, children, count, accent }: FormSection
   const [isOpen, setIsOpen] = useState(true);
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.04] shadow-lg shadow-black/40 transition-shadow duration-200 hover:shadow-black/60 hover:border-white/[0.14]">
+    <div className="form-card fade-in">
       {/* Card header / toggle */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-5 py-4 hover:bg-white/[0.04] transition-colors duration-150 group rounded-2xl"
+        className="w-full flex items-center justify-between px-5 py-4 hover:bg-white/[0.03] transition-colors duration-150 group rounded-2xl"
       >
         <div className="flex items-center gap-3">
           <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${accent}`}>
@@ -30,20 +30,18 @@ const FormSection = ({ title, icon: Icon, children, count, accent }: FormSection
           <span className="font-display font-semibold text-[15px] text-white/90 tracking-tight">{title}</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold tabular-nums px-2 py-0.5 rounded-md bg-black/30 text-white/50 border border-white/8">
-            {count}
-          </span>
+          <span className="section-badge">{count}</span>
           <motion.div
             animate={{ rotate: isOpen ? 180 : 0 }}
             transition={{ duration: 0.2, ease: "easeInOut" }}
-            className="text-white/30 group-hover:text-white/60 transition-colors"
+            className="text-white/30 group-hover:text-white/65 transition-colors"
           >
             <ChevronDown size={15} />
           </motion.div>
         </div>
       </button>
 
-      {/* Collapsible content — NO max-height, grows naturally */}
+      {/* Collapsible body — grows naturally, sidebar scrolls as one unit */}
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
@@ -53,7 +51,7 @@ const FormSection = ({ title, icon: Icon, children, count, accent }: FormSection
             exit={{ height: 0, opacity: 0, overflow: "hidden" }}
             transition={{ duration: 0.22, ease: "easeInOut" }}
           >
-            <div className="px-5 pb-5 pt-3 border-t border-white/8 flex flex-col gap-3">
+            <div className="px-5 pb-5 pt-3 border-t border-white/[0.07] flex flex-col gap-3">
               {children}
             </div>
           </motion.div>
@@ -63,38 +61,26 @@ const FormSection = ({ title, icon: Icon, children, count, accent }: FormSection
   );
 };
 
-/* ─── Shared input style ─── */
-const inputCls =
-  "w-full bg-black/25 border border-white/10 rounded-xl px-4 py-3 text-[14px] text-white placeholder:text-white/30 outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/15 transition-all duration-200 hover:border-white/20";
+/* ── Shared classes ── */
+const inputCls = "glass-input w-full";
+const numInputCls = "glass-input w-full text-center";
+const selectCls = "glass-input w-full";
 
-const numInputCls =
-  "bg-black/25 border border-white/10 rounded-xl px-3 py-3 text-[14px] text-white text-center outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/15 transition-all duration-200 hover:border-white/20";
-
-const selectCls =
-  "w-full bg-black/25 border border-white/10 rounded-xl px-4 py-3 text-[14px] text-white outline-none appearance-none cursor-pointer focus:border-primary/50 focus:ring-2 focus:ring-primary/15 transition-all duration-200 hover:border-white/20";
-
-/* ─── Row wrapper ─── */
+/* ── Field label ── */
 const FieldLabel = ({ children }: { children: ReactNode }) => (
-  <span className="text-[11px] font-medium text-white/45 uppercase tracking-wide mb-1 block">{children}</span>
+  <span className="field-label">{children}</span>
 );
 
-/* ─── Delete button ─── */
+/* ── Delete button ── */
 const DeleteBtn = ({ onClick, title }: { onClick: () => void; title: string }) => (
-  <button
-    onClick={onClick}
-    title={title}
-    className="shrink-0 p-2.5 rounded-xl text-white/25 hover:text-destructive hover:bg-destructive/12 transition-all duration-150 border border-transparent hover:border-destructive/20"
-  >
-    <Trash2 size={14} />
+  <button onClick={onClick} title={title} className="icon-btn">
+    <Trash2 size={15} />
   </button>
 );
 
-/* ─── Add button ─── */
+/* ── Add button ── */
 const AddButton = ({ onClick, label }: { onClick: () => void; label: string }) => (
-  <button
-    onClick={onClick}
-    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-dashed border-white/15 text-white/45 hover:text-primary hover:border-primary/40 hover:bg-primary/5 transition-all duration-200 text-[13px] font-medium"
-  >
+  <button onClick={onClick} className="add-btn">
     <Plus size={14} />
     {label}
   </button>
@@ -125,11 +111,7 @@ export const SubjectsForm = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.97 }}
               transition={{ duration: 0.15 }}
-              className={`rounded-xl border p-3 flex flex-col gap-2.5 transition-colors duration-150 ${
-                warn
-                  ? "border-destructive/35 bg-destructive/8"
-                  : "border-white/8 bg-white/[0.03] hover:border-white/14"
-              }`}
+              className={`subject-item p-3 flex flex-col gap-2.5 ${warn ? "warn" : ""}`}
             >
               {/* Row 1: Subject Name + Delete */}
               <div>
@@ -145,7 +127,7 @@ export const SubjectsForm = () => {
                 </div>
               </div>
 
-              {/* Row 2: Teacher (flexible) + Sessions (fixed width) */}
+              {/* Row 2: Teacher (flex) + Sessions (fixed) */}
               <div className="flex gap-2">
                 <div className="flex-1 min-w-0">
                   <FieldLabel>Teacher</FieldLabel>
@@ -172,7 +154,7 @@ export const SubjectsForm = () => {
                     max="10"
                     value={s.sessionsPerWeek}
                     onChange={(e) => updateSubject(s.id, { sessionsPerWeek: parseInt(e.target.value) || 1 })}
-                    className={numInputCls + " w-full"}
+                    className={numInputCls}
                   />
                 </div>
               </div>
@@ -272,7 +254,7 @@ export const RoomsForm = () => {
                 min="1"
                 value={r.capacity}
                 onChange={(e) => updateRoom(r.id, { capacity: parseInt(e.target.value) || 1 })}
-                className={numInputCls + " w-full"}
+                className={numInputCls}
                 placeholder="30"
               />
             </div>
@@ -322,7 +304,7 @@ export const TimeSlotsForm = () => {
             transition={{ duration: 0.15 }}
             className="flex items-center gap-2"
           >
-            <span className="flex-1 px-4 py-3 text-[14px] text-white/85 font-mono bg-black/20 rounded-xl border border-white/8 leading-none truncate">
+            <span className="slot-pill">
               {ts.label ?? `${ts.day} ${ts.time}`}
             </span>
             <DeleteBtn onClick={() => removeTimeSlot(ts.id)} title="Remove time slot" />
@@ -330,8 +312,8 @@ export const TimeSlotsForm = () => {
         ))}
       </AnimatePresence>
 
-      {/* Add new slot row */}
-      <div className="flex gap-2 pt-1 border-t border-white/8 mt-1">
+      {/* Add new slot */}
+      <div className="flex gap-2 pt-1 border-t border-white/[0.07] mt-1">
         <div className="flex-1 min-w-0">
           <FieldLabel>Day</FieldLabel>
           <select
@@ -359,10 +341,10 @@ export const TimeSlotsForm = () => {
         <div className="pt-[22px] shrink-0">
           <button
             onClick={handleAdd}
-            className="h-[46px] px-3 rounded-xl border border-primary/35 text-primary hover:bg-primary/12 hover:border-primary/60 transition-all duration-150"
+            className="icon-btn border border-primary/30 text-primary hover:text-white hover:bg-primary/20 hover:border-primary/60"
             title="Add slot"
           >
-            <Plus size={16} />
+            <Plus size={15} />
           </button>
         </div>
       </div>
