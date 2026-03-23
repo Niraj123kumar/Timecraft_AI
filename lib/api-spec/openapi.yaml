@@ -1,310 +1,281 @@
-openapi: 3.1.0
-info:
+
   # Do not change the title, if the title changes, the import paths will be broken
-  title: Api
-  version: 0.1.0
-  description: API specification
-servers:
-  - url: /api
-    description: Base API path
-tags:
-  - name: health
-    description: Health operations
-  - name: csp
-    description: CSP Solver operations
-paths:
-  /healthz:
-    get:
-      operationId: healthCheck
-      tags: [health]
-      summary: Health check
-      description: Returns server health status
-      responses:
-        "200":
-          description: Healthy
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/HealthStatus"
-  /csp/health:
-    get:
-      operationId: cspHealth
-      tags: [csp]
-      summary: CSP solver service health check
-      description: Returns health status of the CSP solver service
-      responses:
-        "200":
-          description: Healthy
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/HealthStatus"
-        "502":
-          description: CSP solver service unavailable
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  /csp/solve:
-    post:
-      operationId: solveCsp
-      tags: [csp]
-      summary: Solve a CSP scheduling problem
-      description: Runs the CSP solver with backtracking, forward checking, constraint propagation, MRV and degree heuristics to produce valid timetables.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CspRequest"
-      responses:
-        "200":
-          description: Solver finished (may or may not have found a solution)
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CspResponse"
-        "400":
-          description: Invalid input
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "500":
-          description: Internal solver error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
+     openapi: 3.1.0
+     info:
+       title: Api
+       version: 0.1.0
+       description: API specification
 
-components:
-  schemas:
-    HealthStatus:
-      type: object
-      properties:
-        status:
-          type: string
-      required:
-        - status
+     servers:
+       - url: /api
+         description: Base API path
 
-    Subject:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        teacherId:
-          type: string
-        sessionsPerWeek:
-          type: integer
-          minimum: 1
-          default: 1
-      required:
-        - id
-        - name
-        - teacherId
+     tags:
+       - name: health
+         description: Health operations
+       - name: csp
+         description: CSP Solver operations
 
-    Teacher:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        availableSlots:
-          type: array
-          items:
-            type: string
-          description: List of time slot IDs this teacher is available for. Empty means all slots.
-      required:
-        - id
-        - name
+     paths:
+       /healthz:
+         get:
+           operationId: healthCheck
+           tags: [health]
+           summary: Health check
+           responses:
+             "200":
+               description: Healthy
+               content:
+                 application/json:
+                   schema:
+                     $ref: "#/components/schemas/HealthStatus"
 
-    Room:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        capacity:
-          type: integer
-          minimum: 1
-          default: 30
-      required:
-        - id
-        - name
+       /csp/health:
+         get:
+           operationId: cspHealth
+           tags: [csp]
+           summary: CSP solver service health check
+           responses:
+             "200":
+               description: Healthy
+               content:
+                 application/json:
+                   schema:
+                     $ref: "#/components/schemas/HealthStatus"
+             "502":
+               description: CSP solver service unavailable
+               content:
+                 application/json:
+                   schema:
+                     $ref: "#/components/schemas/ErrorResponse"
 
-    TimeSlot:
-      type: object
-      properties:
-        id:
-          type: string
-        day:
-          type: string
-          enum: [Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]
-        time:
-          type: string
-          description: Time in HH:MM format, e.g. "09:00"
-        label:
-          type: string
-          description: Human-readable label, e.g. "Monday 9AM"
-      required:
-        - id
-        - day
-        - time
+       /csp/solve:
+         post:
+           operationId: solveCsp
+           tags: [csp]
+           summary: Solve a CSP scheduling problem
+           description: Runs the CSP solver using backtracking, forward checking, MRV and degree heuristics to produce valid timetables.
+           requestBody:
+             required: true
+             content:
+               application/json:
+                 schema:
+                   $ref: "#/components/schemas/CspRequest"
+           responses:
+             "200":
+               description: Solver finished
+               content:
+                 application/json:
+                   schema:
+                     $ref: "#/components/schemas/CspResponse"
+             "400":
+               description: Invalid input
+               content:
+                 application/json:
+                   schema:
+                     $ref: "#/components/schemas/ErrorResponse"
+             "500":
+               description: Internal solver error
+               content:
+                 application/json:
+                   schema:
+                     $ref: "#/components/schemas/ErrorResponse"
 
-    CspRequest:
-      type: object
-      properties:
-        subjects:
-          type: array
-          items:
-            $ref: "#/components/schemas/Subject"
-          minItems: 1
-        teachers:
-          type: array
-          items:
-            $ref: "#/components/schemas/Teacher"
-          minItems: 1
-        rooms:
-          type: array
-          items:
-            $ref: "#/components/schemas/Room"
-          minItems: 1
-        timeSlots:
-          type: array
-          items:
-            $ref: "#/components/schemas/TimeSlot"
-          minItems: 1
-        maxSolutions:
-          type: integer
-          minimum: 1
-          maximum: 10
-          default: 3
-          description: Maximum number of solutions to find
-        includeSteps:
-          type: boolean
-          default: false
-          description: Whether to include step-by-step solving trace
-      required:
-        - subjects
-        - teachers
-        - rooms
-        - timeSlots
+     components:
+       schemas:
 
-    TimetableEntry:
-      type: object
-      properties:
-        subjectId:
-          type: string
-        subjectName:
-          type: string
-        teacherId:
-          type: string
-        teacherName:
-          type: string
-        roomId:
-          type: string
-        roomName:
-          type: string
-        timeSlotId:
-          type: string
-        day:
-          type: string
-        time:
-          type: string
-        label:
-          type: string
-      required:
-        - subjectId
-        - subjectName
-        - teacherId
-        - teacherName
-        - roomId
-        - roomName
-        - timeSlotId
-        - day
-        - time
-        - label
+         HealthStatus:
+           type: object
+           properties:
+             status:
+               type: string
+           required: [status]
 
-    SolvingStep:
-      type: object
-      properties:
-        stepNumber:
-          type: integer
-        action:
-          type: string
-          enum: [assign, backtrack, propagate, forward_check]
-        variable:
-          type: string
-        value:
-          type: string
-        message:
-          type: string
-        domainsRemaining:
-          type: object
-          additionalProperties:
-            type: integer
-      required:
-        - stepNumber
-        - action
-        - variable
-        - message
+         Subject:
+           type: object
+           properties:
+             id:
+               type: string
+             name:
+               type: string
+             teacherId:
+               type: string
+             sessionsPerWeek:
+               type: integer
+               minimum: 1
+               default: 1
+           required: [id, name, teacherId]
 
-    CspResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        solutions:
-          type: array
-          items:
-            type: array
-            items:
-              $ref: "#/components/schemas/TimetableEntry"
-        solutionsFound:
-          type: integer
-        steps:
-          type: array
-          nullable: true
-          items:
-            $ref: "#/components/schemas/SolvingStep"
-        stats:
-          $ref: "#/components/schemas/SolverStats"
-        message:
-          type: string
-          nullable: true
-      required:
-        - success
-        - solutions
-        - solutionsFound
-        - stats
+         Teacher:
+           type: object
+           properties:
+             id:
+               type: string
+             name:
+               type: string
+             availableSlots:
+               type: array
+               items:
+                 type: string
+           required: [id, name]
 
-    SolverStats:
-      type: object
-      properties:
-        assignments:
-          type: integer
-        backtracks:
-          type: integer
-        propagations:
-          type: integer
-        timeMs:
-          type: number
-      required:
-        - assignments
-        - backtracks
-        - propagations
-        - timeMs
+         Room:
+           type: object
+           properties:
+             id:
+               type: string
+             name:
+               type: string
+             capacity:
+               type: integer
+               minimum: 1
+               default: 30
+           required: [id, name]
 
-    ErrorResponse:
-      type: object
-      properties:
-        error:
-          type: string
-        details:
-          type: string
-      required:
-        - error
+         TimeSlot:
+           type: object
+           properties:
+             id:
+               type: string
+             day:
+               type: string
+               enum: [Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]
+             time:
+               type: string
+               pattern: "^[0-2][0-9]:[0-5][0-9]$"
+             label:
+               type: string
+           required: [id, day, time]
+
+         CspRequest:
+           type: object
+           properties:
+             subjects:
+               type: array
+               items:
+                 $ref: "#/components/schemas/Subject"
+               minItems: 1
+             teachers:
+               type: array
+               items:
+                 $ref: "#/components/schemas/Teacher"
+               minItems: 1
+             rooms:
+               type: array
+               items:
+                 $ref: "#/components/schemas/Room"
+               minItems: 1
+             timeSlots:
+               type: array
+               items:
+                 $ref: "#/components/schemas/TimeSlot"
+               minItems: 1
+             maxSolutions:
+               type: integer
+               minimum: 1
+               maximum: 10
+               default: 3
+             includeSteps:
+               type: boolean
+               default: false
+           required: [subjects, teachers, rooms, timeSlots]
+
+         TimetableEntry:
+           type: object
+           properties:
+             subjectId: { type: string }
+             subjectName: { type: string }
+             teacherId: { type: string }
+             teacherName: { type: string }
+             roomId: { type: string }
+             roomName: { type: string }
+             timeSlotId: { type: string }
+             day: { type: string }
+             time: { type: string }
+             label: { type: string }
+           required:
+             - subjectId
+             - subjectName
+             - teacherId
+             - teacherName
+             - roomId
+             - roomName
+             - timeSlotId
+             - day
+             - time
+             - label
+
+         SolvingStep:
+           type: object
+           properties:
+             stepNumber:
+               type: integer
+             action:
+               type: string
+               enum: [assign, backtrack, forward_check]
+             variable:
+               type: string
+             value:
+               type: string
+             message:
+               type: string
+             domainsRemaining:
+               type: object
+               additionalProperties:
+                 type: integer
+           required:
+             - stepNumber
+             - action
+             - variable
+             - message
+
+         SolverStats:
+           type: object
+           properties:
+             assignments:
+               type: integer
+             backtracks:
+               type: integer
+             propagations:
+               type: integer
+             timeMs:
+               type: number
+           required: [assignments, backtracks, propagations, timeMs]
+
+         CspResponse:
+           type: object
+           properties:
+             success:
+               type: boolean
+             solutions:
+               type: array
+               items:
+                 type: array
+                 items:
+                   $ref: "#/components/schemas/TimetableEntry"
+             solutionsFound:
+               type: integer
+             steps:
+               type: array
+               nullable: true
+               items:
+                 $ref: "#/components/schemas/SolvingStep"
+             stats:
+               $ref: "#/components/schemas/SolverStats"
+             message:
+               type: string
+               nullable: true
+           required:
+             - success
+             - solutions
+             - solutionsFound
+             - stats
+
+         ErrorResponse:
+           type: object
+           properties:
+             error:
+               type: string
+             details:
+               type: string
+           required: [error]

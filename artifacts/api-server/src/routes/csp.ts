@@ -5,8 +5,8 @@ const router: IRouter = Router();
 
 const CSP_SERVICE_URL = process.env.CSP_SERVICE_URL || "http://localhost:8001";
 
-async function proxyGet(req: Request, res: Response, path: string): Promise<void> {
-  const url = `${CSP_SERVICE_URL}${path}`;
+router.get("/csp/health", async (req: Request, res: Response) => {
+  const url = `${CSP_SERVICE_URL}/csp/health`;
   try {
     const upstream = await fetch(url, { method: "GET", headers: { "Content-Type": "application/json" } });
     const data: unknown = await upstream.json();
@@ -15,13 +15,9 @@ async function proxyGet(req: Request, res: Response, path: string): Promise<void
     req.log.error({ err, url }, "CSP service proxy error");
     res.status(502).json({ error: "CSP solver service unavailable", details: String(err) });
   }
-}
-
-router.get("/csp/health", async (req, res) => {
-  await proxyGet(req, res, "/csp/health");
 });
 
-router.post("/csp/solve", async (req, res) => {
+router.post("/csp/solve", async (req: Request, res: Response) => {
   const parseResult = SolveCspBody.safeParse(req.body);
   if (!parseResult.success) {
     res.status(400).json({

@@ -9,6 +9,5 @@
 export interface Teacher {
   id: string;
   name: string;
-  /** List of time slot IDs this teacher is available for. Empty means all slots. */
   availableSlots?: string[];
 }

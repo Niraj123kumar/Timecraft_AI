@@ -8,7 +8,6 @@
 import * as zod from "zod";
 
 /**
- * Returns server health status
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({
@@ -16,7 +15,6 @@ export const HealthCheckResponse = zod.object({
 });
 
 /**
- * Returns health status of the CSP solver service
  * @summary CSP solver service health check
  */
 export const CspHealthResponse = zod.object({
@@ -24,12 +22,16 @@ export const CspHealthResponse = zod.object({
 });
 
 /**
- * Runs the CSP solver with backtracking, forward checking, constraint propagation, MRV and degree heuristics to produce valid timetables.
+ * Runs the CSP solver using backtracking, forward checking, MRV and degree heuristics to produce valid timetables.
  * @summary Solve a CSP scheduling problem
  */
 export const solveCspBodySubjectsItemSessionsPerWeekDefault = 1;
 
 export const solveCspBodyRoomsItemCapacityDefault = 30;
+
+export const solveCspBodyTimeSlotsItemTimeRegExp = new RegExp(
+  "^[0-2][0-9]:[0-5][0-9]$",
+);
 
 export const solveCspBodyMaxSolutionsDefault = 3;
 export const solveCspBodyMaxSolutionsMax = 10;
@@ -55,12 +57,7 @@ export const SolveCspBody = zod.object({
       zod.object({
         id: zod.string(),
         name: zod.string(),
-        availableSlots: zod
-          .array(zod.string())
-          .optional()
-          .describe(
-            "List of time slot IDs this teacher is available for. Empty means all slots.",
-          ),
+        availableSlots: zod.array(zod.string()).optional(),
       }),
     )
     .min(1),
@@ -89,11 +86,8 @@ export const SolveCspBody = zod.object({
           "Saturday",
           "Sunday",
         ]),
-        time: zod.string().describe('Time in HH:MM format, e.g. \"09:00\"'),
-        label: zod
-          .string()
-          .optional()
-          .describe('Human-readable label, e.g. \"Monday 9AM\"'),
+        time: zod.string().regex(solveCspBodyTimeSlotsItemTimeRegExp),
+        label: zod.string().optional(),
       }),
     )
     .min(1),
@@ -101,12 +95,8 @@ export const SolveCspBody = zod.object({
     .number()
     .min(1)
     .max(solveCspBodyMaxSolutionsMax)
-    .default(solveCspBodyMaxSolutionsDefault)
-    .describe("Maximum number of solutions to find"),
-  includeSteps: zod
-    .boolean()
-    .default(solveCspBodyIncludeStepsDefault)
-    .describe("Whether to include step-by-step solving trace"),
+    .default(solveCspBodyMaxSolutionsDefault),
+  includeSteps: zod.boolean().default(solveCspBodyIncludeStepsDefault),
 });
 
 export const SolveCspResponse = zod.object({
@@ -132,7 +122,7 @@ export const SolveCspResponse = zod.object({
     .array(
       zod.object({
         stepNumber: zod.number(),
-        action: zod.enum(["assign", "backtrack", "propagate", "forward_check"]),
+        action: zod.enum(["assign", "backtrack", "forward_check"]),
         variable: zod.string(),
         value: zod.string().optional(),
         message: zod.string(),

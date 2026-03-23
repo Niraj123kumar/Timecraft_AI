@@ -10,8 +10,7 @@ import type { TimeSlotDay } from "./timeSlotDay";
 export interface TimeSlot {
   id: string;
   day: TimeSlotDay;
-  /** Time in HH:MM format, e.g. "09:00" */
+  /** @pattern ^[0-2][0-9]:[0-5][0-9]$ */
   time: string;
-  /** Human-readable label, e.g. "Monday 9AM" */
   label?: string;
 }

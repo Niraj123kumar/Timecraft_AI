@@ -20,11 +20,9 @@ export interface CspRequest {
   /** @minItems 1 */
   timeSlots: TimeSlot[];
   /**
-   * Maximum number of solutions to find
    * @minimum 1
    * @maximum 10
    */
   maxSolutions?: number;
-  /** Whether to include step-by-step solving trace */
   includeSteps?: boolean;
 }

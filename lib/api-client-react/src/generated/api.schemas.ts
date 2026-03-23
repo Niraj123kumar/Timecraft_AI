@@ -20,7 +20,6 @@ export interface Subject {
 export interface Teacher {
   id: string;
   name: string;
-  /** List of time slot IDs this teacher is available for. Empty means all slots. */
   availableSlots?: string[];
 }
 
@@ -46,9 +45,8 @@ export const TimeSlotDay = {
 export interface TimeSlot {
   id: string;
   day: TimeSlotDay;
-  /** Time in HH:MM format, e.g. "09:00" */
+  /** @pattern ^[0-2][0-9]:[0-5][0-9]$ */
   time: string;
-  /** Human-readable label, e.g. "Monday 9AM" */
   label?: string;
 }
 
@@ -62,12 +60,10 @@ export interface CspRequest {
   /** @minItems 1 */
   timeSlots: TimeSlot[];
   /**
-   * Maximum number of solutions to find
    * @minimum 1
    * @maximum 10
    */
   maxSolutions?: number;
-  /** Whether to include step-by-step solving trace */
   includeSteps?: boolean;
 }
 
@@ -90,7 +86,6 @@ export type SolvingStepAction =
 export const SolvingStepAction = {
   assign: "assign",
   backtrack: "backtrack",
-  propagate: "propagate",
   forward_check: "forward_check",
 } as const;
 

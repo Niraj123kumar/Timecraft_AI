@@ -12,6 +12,5 @@ export type SolvingStepAction =
 export const SolvingStepAction = {
   assign: "assign",
   backtrack: "backtrack",
-  propagate: "propagate",
   forward_check: "forward_check",
 } as const;
