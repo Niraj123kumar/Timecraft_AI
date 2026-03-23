@@ -212,7 +212,7 @@
                type: integer
              action:
                type: string
-               enum: [assign, backtrack, forward_check]
+               enum: [assign, backtrack, propagate, forward_check]
              variable:
                type: string
              value:

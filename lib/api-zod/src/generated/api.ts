@@ -122,7 +122,7 @@ export const SolveCspResponse = zod.object({
     .array(
       zod.object({
         stepNumber: zod.number(),
-        action: zod.enum(["assign", "backtrack", "forward_check"]),
+        action: zod.enum(["assign", "backtrack", "propagate", "forward_check"]),
         variable: zod.string(),
         value: zod.string().optional(),
         message: zod.string(),
