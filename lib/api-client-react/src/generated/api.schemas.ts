@@ -8,3 +8,120 @@
 export interface HealthStatus {
   status: string;
 }
+
+export interface Subject {
+  id: string;
+  name: string;
+  teacherId: string;
+  /** @minimum 1 */
+  sessionsPerWeek?: number;
+}
+
+export interface Teacher {
+  id: string;
+  name: string;
+  /** List of time slot IDs this teacher is available for. Empty means all slots. */
+  availableSlots?: string[];
+}
+
+export interface Room {
+  id: string;
+  name: string;
+  /** @minimum 1 */
+  capacity?: number;
+}
+
+export type TimeSlotDay = (typeof TimeSlotDay)[keyof typeof TimeSlotDay];
+
+export const TimeSlotDay = {
+  Monday: "Monday",
+  Tuesday: "Tuesday",
+  Wednesday: "Wednesday",
+  Thursday: "Thursday",
+  Friday: "Friday",
+  Saturday: "Saturday",
+  Sunday: "Sunday",
+} as const;
+
+export interface TimeSlot {
+  id: string;
+  day: TimeSlotDay;
+  /** Time in HH:MM format, e.g. "09:00" */
+  time: string;
+  /** Human-readable label, e.g. "Monday 9AM" */
+  label?: string;
+}
+
+export interface CspRequest {
+  /** @minItems 1 */
+  subjects: Subject[];
+  /** @minItems 1 */
+  teachers: Teacher[];
+  /** @minItems 1 */
+  rooms: Room[];
+  /** @minItems 1 */
+  timeSlots: TimeSlot[];
+  /**
+   * Maximum number of solutions to find
+   * @minimum 1
+   * @maximum 10
+   */
+  maxSolutions?: number;
+  /** Whether to include step-by-step solving trace */
+  includeSteps?: boolean;
+}
+
+export interface TimetableEntry {
+  subjectId: string;
+  subjectName: string;
+  teacherId: string;
+  teacherName: string;
+  roomId: string;
+  roomName: string;
+  timeSlotId: string;
+  day: string;
+  time: string;
+  label: string;
+}
+
+export type SolvingStepAction =
+  (typeof SolvingStepAction)[keyof typeof SolvingStepAction];
+
+export const SolvingStepAction = {
+  assign: "assign",
+  backtrack: "backtrack",
+  propagate: "propagate",
+  forward_check: "forward_check",
+} as const;
+
+export type SolvingStepDomainsRemaining = { [key: string]: number };
+
+export interface SolvingStep {
+  stepNumber: number;
+  action: SolvingStepAction;
+  variable: string;
+  value?: string;
+  message: string;
+  domainsRemaining?: SolvingStepDomainsRemaining;
+}
+
+export interface SolverStats {
+  assignments: number;
+  backtracks: number;
+  propagations: number;
+  timeMs: number;
+}
+
+export interface CspResponse {
+  success: boolean;
+  solutions: TimetableEntry[][];
+  solutionsFound: number;
+  steps?: SolvingStep[];
+  stats: SolverStats;
+  message?: string;
+}
+
+export interface ErrorResponse {
+  error: string;
+  details?: string;
+}

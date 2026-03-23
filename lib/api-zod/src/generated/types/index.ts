@@ -6,4 +6,17 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./cspRequest";
+export * from "./cspResponse";
+export * from "./errorResponse";
 export * from "./healthStatus";
+export * from "./room";
+export * from "./solverStats";
+export * from "./solvingStep";
+export * from "./solvingStepAction";
+export * from "./solvingStepDomainsRemaining";
+export * from "./subject";
+export * from "./teacher";
+export * from "./timeSlot";
+export * from "./timeSlotDay";
+export * from "./timetableEntry";

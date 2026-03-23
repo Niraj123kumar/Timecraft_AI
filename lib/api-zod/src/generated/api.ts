@@ -14,3 +14,129 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * Runs the CSP solver with backtracking, forward checking, constraint propagation, MRV and degree heuristics to produce valid timetables.
+ * @summary Solve a CSP scheduling problem
+ */
+export const solveCspBodySubjectsItemSessionsPerWeekDefault = 1;
+
+export const solveCspBodyRoomsItemCapacityDefault = 30;
+
+export const solveCspBodyMaxSolutionsDefault = 3;
+export const solveCspBodyMaxSolutionsMax = 10;
+
+export const solveCspBodyIncludeStepsDefault = false;
+
+export const SolveCspBody = zod.object({
+  subjects: zod
+    .array(
+      zod.object({
+        id: zod.string(),
+        name: zod.string(),
+        teacherId: zod.string(),
+        sessionsPerWeek: zod
+          .number()
+          .min(1)
+          .default(solveCspBodySubjectsItemSessionsPerWeekDefault),
+      }),
+    )
+    .min(1),
+  teachers: zod
+    .array(
+      zod.object({
+        id: zod.string(),
+        name: zod.string(),
+        availableSlots: zod
+          .array(zod.string())
+          .optional()
+          .describe(
+            "List of time slot IDs this teacher is available for. Empty means all slots.",
+          ),
+      }),
+    )
+    .min(1),
+  rooms: zod
+    .array(
+      zod.object({
+        id: zod.string(),
+        name: zod.string(),
+        capacity: zod
+          .number()
+          .min(1)
+          .default(solveCspBodyRoomsItemCapacityDefault),
+      }),
+    )
+    .min(1),
+  timeSlots: zod
+    .array(
+      zod.object({
+        id: zod.string(),
+        day: zod.enum([
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday",
+        ]),
+        time: zod.string().describe('Time in HH:MM format, e.g. \"09:00\"'),
+        label: zod
+          .string()
+          .optional()
+          .describe('Human-readable label, e.g. \"Monday 9AM\"'),
+      }),
+    )
+    .min(1),
+  maxSolutions: zod
+    .number()
+    .min(1)
+    .max(solveCspBodyMaxSolutionsMax)
+    .default(solveCspBodyMaxSolutionsDefault)
+    .describe("Maximum number of solutions to find"),
+  includeSteps: zod
+    .boolean()
+    .default(solveCspBodyIncludeStepsDefault)
+    .describe("Whether to include step-by-step solving trace"),
+});
+
+export const SolveCspResponse = zod.object({
+  success: zod.boolean(),
+  solutions: zod.array(
+    zod.array(
+      zod.object({
+        subjectId: zod.string(),
+        subjectName: zod.string(),
+        teacherId: zod.string(),
+        teacherName: zod.string(),
+        roomId: zod.string(),
+        roomName: zod.string(),
+        timeSlotId: zod.string(),
+        day: zod.string(),
+        time: zod.string(),
+        label: zod.string(),
+      }),
+    ),
+  ),
+  solutionsFound: zod.number(),
+  steps: zod
+    .array(
+      zod.object({
+        stepNumber: zod.number(),
+        action: zod.enum(["assign", "backtrack", "propagate", "forward_check"]),
+        variable: zod.string(),
+        value: zod.string().optional(),
+        message: zod.string(),
+        domainsRemaining: zod.record(zod.string(), zod.number()).optional(),
+      }),
+    )
+    .optional(),
+  stats: zod.object({
+    assignments: zod.number(),
+    backtracks: zod.number(),
+    propagations: zod.number(),
+    timeMs: zod.number(),
+  }),
+  message: zod.string().optional(),
+});

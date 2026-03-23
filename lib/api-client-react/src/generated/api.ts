@@ -5,18 +5,26 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  MutationFunction,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { HealthStatus } from "./api.schemas";
+import type {
+  CspRequest,
+  CspResponse,
+  ErrorResponse,
+  HealthStatus,
+} from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
-import type { ErrorType } from "../custom-fetch";
+import type { ErrorType, BodyType } from "../custom-fetch";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -99,3 +107,90 @@ export function useHealthCheck<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * Runs the CSP solver with backtracking, forward checking, constraint propagation, MRV and degree heuristics to produce valid timetables.
+ * @summary Solve a CSP scheduling problem
+ */
+export const getSolveCspUrl = () => {
+  return `/api/csp/solve`;
+};
+
+export const solveCsp = async (
+  cspRequest: CspRequest,
+  options?: RequestInit,
+): Promise<CspResponse> => {
+  return customFetch<CspResponse>(getSolveCspUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(cspRequest),
+  });
+};
+
+export const getSolveCspMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof solveCsp>>,
+    TError,
+    { data: BodyType<CspRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof solveCsp>>,
+  TError,
+  { data: BodyType<CspRequest> },
+  TContext
+> => {
+  const mutationKey = ["solveCsp"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof solveCsp>>,
+    { data: BodyType<CspRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return solveCsp(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SolveCspMutationResult = NonNullable<
+  Awaited<ReturnType<typeof solveCsp>>
+>;
+export type SolveCspMutationBody = BodyType<CspRequest>;
+export type SolveCspMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Solve a CSP scheduling problem
+ */
+export const useSolveCsp = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof solveCsp>>,
+    TError,
+    { data: BodyType<CspRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof solveCsp>>,
+  TError,
+  { data: BodyType<CspRequest> },
+  TContext
+> => {
+  return useMutation(getSolveCspMutationOptions(options));
+};
