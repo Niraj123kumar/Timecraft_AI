@@ -5,12 +5,32 @@ const router: IRouter = Router();
 
 const CSP_SERVICE_URL = process.env.CSP_SERVICE_URL || "http://localhost:8001";
 
+/** Normalize upstream error payloads to the OpenAPI ErrorResponse shape: { error, details } */
+function normalizeErrorPayload(raw: unknown, fallback: string): { error: string; details?: string } {
+  if (raw !== null && typeof raw === "object") {
+    const obj = raw as Record<string, unknown>;
+    // FastAPI HTTPException: { detail: "..." }
+    if (typeof obj["detail"] === "string") {
+      return { error: obj["detail"] };
+    }
+    // Already in correct shape
+    if (typeof obj["error"] === "string") {
+      return { error: obj["error"], details: typeof obj["details"] === "string" ? obj["details"] : undefined };
+    }
+  }
+  return { error: fallback };
+}
+
 router.get("/csp/health", async (req: Request, res: Response) => {
   const url = `${CSP_SERVICE_URL}/csp/health`;
   try {
     const upstream = await fetch(url, { method: "GET", headers: { "Content-Type": "application/json" } });
-    const data: unknown = await upstream.json();
-    res.status(upstream.status).json(data);
+    const raw: unknown = await upstream.json();
+    if (!upstream.ok) {
+      res.status(upstream.status).json(normalizeErrorPayload(raw, "CSP solver health check failed"));
+      return;
+    }
+    res.status(upstream.status).json(raw);
   } catch (err) {
     req.log.error({ err, url }, "CSP service proxy error");
     res.status(502).json({ error: "CSP solver service unavailable", details: String(err) });
@@ -38,7 +58,8 @@ router.post("/csp/solve", async (req: Request, res: Response) => {
     const rawData: unknown = await upstream.json();
 
     if (!upstream.ok) {
-      res.status(upstream.status).json(rawData);
+      // Normalize FastAPI error shape to OpenAPI ErrorResponse contract
+      res.status(upstream.status).json(normalizeErrorPayload(rawData, "CSP solver error"));
       return;
     }
 
