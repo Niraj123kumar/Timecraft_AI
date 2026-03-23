@@ -10,49 +10,50 @@ interface FormSectionProps {
   icon: React.ElementType;
   children: ReactNode;
   count: number;
-  accentColor?: string;
+  accent: string;
 }
 
-const FormSection = ({ title, icon: Icon, children, count, accentColor = "text-primary bg-primary/15" }: FormSectionProps) => {
+const FormSection = ({ title, icon: Icon, children, count, accent }: FormSectionProps) => {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-white/8 bg-white/4 shadow-xl shadow-black/30 backdrop-blur-md transition-all duration-200 hover:border-white/15 hover:shadow-black/50 hover:shadow-2xl">
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] shadow-lg shadow-black/40 transition-shadow duration-200 hover:shadow-black/60 hover:border-white/[0.14]">
+      {/* Card header / toggle */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-5 py-4 hover:bg-white/5 transition-colors duration-150 group"
+        className="w-full flex items-center justify-between px-5 py-4 hover:bg-white/[0.04] transition-colors duration-150 group rounded-2xl"
       >
         <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-xl ${accentColor} transition-colors`}>
-            <Icon size={16} />
+          <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${accent}`}>
+            <Icon size={15} />
           </div>
-          <h3 className="font-display font-semibold text-base text-white/90 tracking-tight">{title}</h3>
+          <span className="font-display font-semibold text-[15px] text-white/90 tracking-tight">{title}</span>
         </div>
-        <div className="flex items-center gap-2.5">
-          <span className="text-xs font-medium px-2.5 py-1 bg-black/30 rounded-lg text-white/55 border border-white/5">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold tabular-nums px-2 py-0.5 rounded-md bg-black/30 text-white/50 border border-white/8">
             {count}
           </span>
           <motion.div
             animate={{ rotate: isOpen ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
             className="text-white/30 group-hover:text-white/60 transition-colors"
           >
-            <ChevronDown size={16} />
+            <ChevronDown size={15} />
           </motion.div>
         </div>
       </button>
 
+      {/* Collapsible content — NO max-height, grows naturally */}
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
-            key="content"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            key="body"
+            initial={{ height: 0, opacity: 0, overflow: "hidden" }}
+            animate={{ height: "auto", opacity: 1, overflow: "visible" }}
+            exit={{ height: 0, opacity: 0, overflow: "hidden" }}
             transition={{ duration: 0.22, ease: "easeInOut" }}
-            className="border-t border-white/6"
           >
-            <div className="p-4 flex flex-col gap-3 max-h-72 overflow-y-auto custom-scrollbar">
+            <div className="px-5 pb-5 pt-3 border-t border-white/8 flex flex-col gap-3">
               {children}
             </div>
           </motion.div>
@@ -62,156 +63,128 @@ const FormSection = ({ title, icon: Icon, children, count, accentColor = "text-p
   );
 };
 
-export const TeachersForm = () => {
-  const { teachers, addTeacher, updateTeacher, removeTeacher } = useSchedulerStore();
+/* ─── Shared input style ─── */
+const inputCls =
+  "w-full bg-black/25 border border-white/10 rounded-xl px-4 py-3 text-[14px] text-white placeholder:text-white/30 outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/15 transition-all duration-200 hover:border-white/20";
 
-  return (
-    <FormSection title="Teachers" icon={Users} count={teachers.length} accentColor="text-secondary bg-secondary/15">
-      <AnimatePresence>
-        {teachers.map((t) => (
-          <motion.div
-            key={t.id}
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96 }}
-            transition={{ duration: 0.15 }}
-            className="flex items-center gap-2.5"
-          >
-            <input
-              value={t.name}
-              onChange={(e) => updateTeacher(t.id, { name: e.target.value })}
-              className="flex-1 glass-input rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-white/30 outline-none"
-              placeholder="Teacher name"
-            />
-            <button
-              onClick={() => removeTeacher(t.id)}
-              className="p-2 text-white/25 hover:text-destructive hover:bg-destructive/10 transition-all duration-150 rounded-lg shrink-0"
-              title="Remove teacher"
-            >
-              <Trash2 size={15} />
-            </button>
-          </motion.div>
-        ))}
-      </AnimatePresence>
-      <AddButton onClick={() => addTeacher({ name: "", availableSlots: [] })} label="Add Teacher" />
-    </FormSection>
-  );
-};
+const numInputCls =
+  "bg-black/25 border border-white/10 rounded-xl px-3 py-3 text-[14px] text-white text-center outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/15 transition-all duration-200 hover:border-white/20";
 
-export const RoomsForm = () => {
-  const { rooms, addRoom, updateRoom, removeRoom } = useSchedulerStore();
+const selectCls =
+  "w-full bg-black/25 border border-white/10 rounded-xl px-4 py-3 text-[14px] text-white outline-none appearance-none cursor-pointer focus:border-primary/50 focus:ring-2 focus:ring-primary/15 transition-all duration-200 hover:border-white/20";
 
-  return (
-    <FormSection title="Rooms" icon={MapPin} count={rooms.length} accentColor="text-accent bg-accent/15">
-      <AnimatePresence>
-        {rooms.map((r) => (
-          <motion.div
-            key={r.id}
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96 }}
-            transition={{ duration: 0.15 }}
-            className="flex items-center gap-2.5"
-          >
-            <input
-              value={r.name}
-              onChange={(e) => updateRoom(r.id, { name: e.target.value })}
-              className="flex-1 glass-input rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-white/30 outline-none"
-              placeholder="Room name"
-            />
-            <div className="flex items-center gap-1.5 shrink-0">
-              <span className="text-xs text-white/40 hidden sm:block">Cap</span>
-              <input
-                type="number"
-                min="1"
-                value={r.capacity}
-                onChange={(e) => updateRoom(r.id, { capacity: parseInt(e.target.value) || 1 })}
-                className="w-20 glass-input rounded-xl px-3 py-2.5 text-sm text-white outline-none text-center"
-                placeholder="30"
-              />
-            </div>
-            <button
-              onClick={() => removeRoom(r.id)}
-              className="p-2 text-white/25 hover:text-destructive hover:bg-destructive/10 transition-all duration-150 rounded-lg shrink-0"
-              title="Remove room"
-            >
-              <Trash2 size={15} />
-            </button>
-          </motion.div>
-        ))}
-      </AnimatePresence>
-      <AddButton onClick={() => addRoom({ name: "", capacity: 30 })} label="Add Room" />
-    </FormSection>
-  );
-};
+/* ─── Row wrapper ─── */
+const FieldLabel = ({ children }: { children: ReactNode }) => (
+  <span className="text-[11px] font-medium text-white/45 uppercase tracking-wide mb-1 block">{children}</span>
+);
 
+/* ─── Delete button ─── */
+const DeleteBtn = ({ onClick, title }: { onClick: () => void; title: string }) => (
+  <button
+    onClick={onClick}
+    title={title}
+    className="shrink-0 p-2.5 rounded-xl text-white/25 hover:text-destructive hover:bg-destructive/12 transition-all duration-150 border border-transparent hover:border-destructive/20"
+  >
+    <Trash2 size={14} />
+  </button>
+);
+
+/* ─── Add button ─── */
+const AddButton = ({ onClick, label }: { onClick: () => void; label: string }) => (
+  <button
+    onClick={onClick}
+    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-dashed border-white/15 text-white/45 hover:text-primary hover:border-primary/40 hover:bg-primary/5 transition-all duration-200 text-[13px] font-medium"
+  >
+    <Plus size={14} />
+    {label}
+  </button>
+);
+
+/* ══════════════════════════════════════
+   SUBJECTS
+══════════════════════════════════════ */
 export const SubjectsForm = () => {
   const { subjects, teachers, addSubject, updateSubject, removeSubject } = useSchedulerStore();
 
   return (
-    <FormSection title="Subjects" icon={BookOpen} count={subjects.length} accentColor="text-primary bg-primary/15">
+    <FormSection
+      title="Subjects"
+      icon={BookOpen}
+      count={subjects.length}
+      accent="text-primary bg-primary/20"
+    >
       <AnimatePresence>
         {subjects.map((s) => {
-          const missingTeacher = s.teacherId && !teachers.find((t) => t.id === s.teacherId);
+          const hasTeacher = !!teachers.find((t) => t.id === s.teacherId);
+          const warn = s.teacherId && !hasTeacher;
+
           return (
             <motion.div
               key={s.id}
-              initial={{ opacity: 0, y: -8 }}
+              initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96 }}
+              exit={{ opacity: 0, scale: 0.97 }}
               transition={{ duration: 0.15 }}
-              className={`flex flex-col gap-2 p-3 rounded-xl border transition-colors ${
-                missingTeacher
-                  ? "bg-destructive/10 border-destructive/30"
-                  : "bg-white/4 border-white/6 hover:border-white/12"
+              className={`rounded-xl border p-3 flex flex-col gap-2.5 transition-colors duration-150 ${
+                warn
+                  ? "border-destructive/35 bg-destructive/8"
+                  : "border-white/8 bg-white/[0.03] hover:border-white/14"
               }`}
             >
-              <div className="flex items-center gap-2.5">
-                <input
-                  value={s.name}
-                  onChange={(e) => updateSubject(s.id, { name: e.target.value })}
-                  className="flex-1 glass-input rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none"
-                  placeholder="Subject name"
-                />
-                <button
-                  onClick={() => removeSubject(s.id)}
-                  className="p-2 text-white/25 hover:text-destructive hover:bg-destructive/10 transition-all duration-150 rounded-lg shrink-0"
-                  title="Remove subject"
-                >
-                  <Trash2 size={15} />
-                </button>
+              {/* Row 1: Subject Name + Delete */}
+              <div>
+                <FieldLabel>Subject Name</FieldLabel>
+                <div className="flex items-center gap-2">
+                  <input
+                    value={s.name}
+                    onChange={(e) => updateSubject(s.id, { name: e.target.value })}
+                    className={inputCls}
+                    placeholder="e.g. Mathematics"
+                  />
+                  <DeleteBtn onClick={() => removeSubject(s.id)} title="Remove subject" />
+                </div>
               </div>
-              <div className="flex items-center gap-2.5">
-                <select
-                  value={s.teacherId}
-                  onChange={(e) => updateSubject(s.id, { teacherId: e.target.value })}
-                  className="flex-1 glass-input rounded-lg px-3 py-2 text-sm text-white outline-none appearance-none cursor-pointer"
-                >
-                  <option value="" disabled className="text-black bg-gray-900">
-                    Select teacher…
-                  </option>
-                  {teachers.map((t) => (
-                    <option key={t.id} value={t.id} className="text-black bg-gray-900">
-                      {t.name}
+
+              {/* Row 2: Teacher (flexible) + Sessions (fixed width) */}
+              <div className="flex gap-2">
+                <div className="flex-1 min-w-0">
+                  <FieldLabel>Teacher</FieldLabel>
+                  <select
+                    value={s.teacherId}
+                    onChange={(e) => updateSubject(s.id, { teacherId: e.target.value })}
+                    className={selectCls}
+                  >
+                    <option value="" disabled className="bg-gray-900">
+                      Select teacher…
                     </option>
-                  ))}
-                </select>
-                <label className="flex items-center gap-1.5 text-white/50 text-xs shrink-0">
-                  <span>Sessions</span>
+                    {teachers.map((t) => (
+                      <option key={t.id} value={t.id} className="bg-gray-900">
+                        {t.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="w-24 shrink-0">
+                  <FieldLabel>Sessions/wk</FieldLabel>
                   <input
                     type="number"
                     min="1"
                     max="10"
                     value={s.sessionsPerWeek}
                     onChange={(e) => updateSubject(s.id, { sessionsPerWeek: parseInt(e.target.value) || 1 })}
-                    className="w-14 glass-input rounded-lg px-2 py-2 text-center text-white text-sm outline-none"
+                    className={numInputCls + " w-full"}
                   />
-                </label>
+                </div>
               </div>
+
+              {warn && (
+                <p className="text-xs text-destructive/90 font-medium">Teacher no longer exists — please reassign.</p>
+              )}
             </motion.div>
           );
         })}
       </AnimatePresence>
+
       <AddButton
         onClick={() => addSubject({ name: "", teacherId: teachers[0]?.id || "", sessionsPerWeek: 2 })}
         label="Add Subject"
@@ -220,6 +193,103 @@ export const SubjectsForm = () => {
   );
 };
 
+/* ══════════════════════════════════════
+   TEACHERS
+══════════════════════════════════════ */
+export const TeachersForm = () => {
+  const { teachers, addTeacher, updateTeacher, removeTeacher } = useSchedulerStore();
+
+  return (
+    <FormSection
+      title="Teachers"
+      icon={Users}
+      count={teachers.length}
+      accent="text-secondary bg-secondary/20"
+    >
+      <AnimatePresence>
+        {teachers.map((t) => (
+          <motion.div
+            key={t.id}
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.97 }}
+            transition={{ duration: 0.15 }}
+          >
+            <FieldLabel>Teacher Name</FieldLabel>
+            <div className="flex items-center gap-2">
+              <input
+                value={t.name}
+                onChange={(e) => updateTeacher(t.id, { name: e.target.value })}
+                className={inputCls}
+                placeholder="e.g. Dr. Smith"
+              />
+              <DeleteBtn onClick={() => removeTeacher(t.id)} title="Remove teacher" />
+            </div>
+          </motion.div>
+        ))}
+      </AnimatePresence>
+      <AddButton onClick={() => addTeacher({ name: "", availableSlots: [] })} label="Add Teacher" />
+    </FormSection>
+  );
+};
+
+/* ══════════════════════════════════════
+   ROOMS
+══════════════════════════════════════ */
+export const RoomsForm = () => {
+  const { rooms, addRoom, updateRoom, removeRoom } = useSchedulerStore();
+
+  return (
+    <FormSection
+      title="Rooms"
+      icon={MapPin}
+      count={rooms.length}
+      accent="text-accent bg-accent/20"
+    >
+      <AnimatePresence>
+        {rooms.map((r) => (
+          <motion.div
+            key={r.id}
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.97 }}
+            transition={{ duration: 0.15 }}
+            className="flex gap-2"
+          >
+            <div className="flex-1 min-w-0">
+              <FieldLabel>Room Name</FieldLabel>
+              <input
+                value={r.name}
+                onChange={(e) => updateRoom(r.id, { name: e.target.value })}
+                className={inputCls}
+                placeholder="e.g. Lab A"
+              />
+            </div>
+            <div className="w-24 shrink-0">
+              <FieldLabel>Capacity</FieldLabel>
+              <input
+                type="number"
+                min="1"
+                value={r.capacity}
+                onChange={(e) => updateRoom(r.id, { capacity: parseInt(e.target.value) || 1 })}
+                className={numInputCls + " w-full"}
+                placeholder="30"
+              />
+            </div>
+            <div className="pt-[22px]">
+              <DeleteBtn onClick={() => removeRoom(r.id)} title="Remove room" />
+            </div>
+          </motion.div>
+        ))}
+      </AnimatePresence>
+      <AddButton onClick={() => addRoom({ name: "", capacity: 30 })} label="Add Room" />
+    </FormSection>
+  );
+};
+
+/* ══════════════════════════════════════
+   TIME SLOTS
+══════════════════════════════════════ */
 const DAYS = Object.values(TimeSlotDay);
 
 export const TimeSlotsForm = () => {
@@ -228,80 +298,74 @@ export const TimeSlotsForm = () => {
   const [newTime, setNewTime] = useState("09:00");
 
   const handleAdd = () => {
-    const trimmedTime = newTime.trim();
-    if (!trimmedTime || !newDay) return;
-    const exists = timeSlots.some((ts) => ts.day === newDay && ts.time === trimmedTime);
-    if (exists) return;
-    addTimeSlot({ day: newDay, time: trimmedTime, label: `${newDay} ${trimmedTime}` });
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") handleAdd();
+    const t = newTime.trim();
+    if (!t || !newDay) return;
+    if (timeSlots.some((ts) => ts.day === newDay && ts.time === t)) return;
+    addTimeSlot({ day: newDay, time: t, label: `${newDay} ${t}` });
   };
 
   return (
-    <FormSection title="Time Slots" icon={Clock} count={timeSlots.length} accentColor="text-warning bg-warning/15">
+    <FormSection
+      title="Time Slots"
+      icon={Clock}
+      count={timeSlots.length}
+      accent="text-warning bg-warning/20"
+    >
+      {/* Existing slots */}
       <AnimatePresence>
         {timeSlots.map((ts) => (
           <motion.div
             key={ts.id}
-            initial={{ opacity: 0, y: -8 }}
+            initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96 }}
+            exit={{ opacity: 0, scale: 0.97 }}
             transition={{ duration: 0.15 }}
-            className="flex items-center gap-2.5"
+            className="flex items-center gap-2"
           >
-            <span className="flex-1 text-sm text-white/80 px-3.5 py-2.5 bg-white/4 rounded-xl border border-white/6 font-mono">
+            <span className="flex-1 px-4 py-3 text-[14px] text-white/85 font-mono bg-black/20 rounded-xl border border-white/8 leading-none truncate">
               {ts.label ?? `${ts.day} ${ts.time}`}
             </span>
-            <button
-              onClick={() => removeTimeSlot(ts.id)}
-              className="p-2 text-white/25 hover:text-destructive hover:bg-destructive/10 transition-all duration-150 rounded-lg shrink-0"
-              title="Remove time slot"
-            >
-              <Trash2 size={15} />
-            </button>
+            <DeleteBtn onClick={() => removeTimeSlot(ts.id)} title="Remove time slot" />
           </motion.div>
         ))}
       </AnimatePresence>
 
-      <div className="flex items-center gap-2 pt-2 border-t border-white/6 mt-1">
-        <select
-          value={newDay}
-          onChange={(e) => setNewDay(e.target.value as TimeSlotDay)}
-          className="flex-1 glass-input rounded-xl px-3 py-2 text-sm text-white outline-none appearance-none cursor-pointer"
-        >
-          {DAYS.map((d) => (
-            <option key={d} value={d} className="text-black bg-gray-900">
-              {d}
-            </option>
-          ))}
-        </select>
-        <input
-          type="time"
-          value={newTime}
-          onChange={(e) => setNewTime(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className="w-28 glass-input rounded-xl px-3 py-2 text-sm text-white outline-none"
-        />
-        <button
-          onClick={handleAdd}
-          className="p-2.5 text-primary hover:bg-primary/15 transition-all duration-150 rounded-xl border border-primary/30 hover:border-primary/60 shrink-0"
-          title="Add time slot"
-        >
-          <Plus size={15} />
-        </button>
+      {/* Add new slot row */}
+      <div className="flex gap-2 pt-1 border-t border-white/8 mt-1">
+        <div className="flex-1 min-w-0">
+          <FieldLabel>Day</FieldLabel>
+          <select
+            value={newDay}
+            onChange={(e) => setNewDay(e.target.value as TimeSlotDay)}
+            className={selectCls}
+          >
+            {DAYS.map((d) => (
+              <option key={d} value={d} className="bg-gray-900">
+                {d}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="w-32 shrink-0">
+          <FieldLabel>Time</FieldLabel>
+          <input
+            type="time"
+            value={newTime}
+            onChange={(e) => setNewTime(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+            className={inputCls}
+          />
+        </div>
+        <div className="pt-[22px] shrink-0">
+          <button
+            onClick={handleAdd}
+            className="h-[46px] px-3 rounded-xl border border-primary/35 text-primary hover:bg-primary/12 hover:border-primary/60 transition-all duration-150"
+            title="Add slot"
+          >
+            <Plus size={16} />
+          </button>
+        </div>
       </div>
     </FormSection>
   );
 };
-
-const AddButton = ({ onClick, label }: { onClick: () => void; label: string }) => (
-  <button
-    onClick={onClick}
-    className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-dashed border-white/15 text-white/45 hover:text-primary hover:border-primary/45 hover:bg-primary/5 transition-all duration-200 text-sm font-medium mt-1"
-  >
-    <Plus size={15} />
-    {label}
-  </button>
-);

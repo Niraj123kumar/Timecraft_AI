@@ -78,10 +78,10 @@ export default function Dashboard() {
         <div className="flex flex-1 min-h-0 overflow-hidden">
 
           {/* ── LEFT SIDEBAR ── */}
-          <aside className="w-[380px] shrink-0 flex flex-col border-r border-white/6 bg-black/10 backdrop-blur-sm">
+          <aside className="w-[420px] shrink-0 flex flex-col border-r border-white/6 bg-black/10 backdrop-blur-sm">
 
             {/* Solver Config card */}
-            <div className="px-4 pt-4 shrink-0">
+            <div className="px-5 pt-5 shrink-0">
               <div className="rounded-2xl border border-white/8 bg-white/4 shadow-xl shadow-black/30 backdrop-blur-md overflow-hidden mb-4">
                 <div className="flex items-center justify-between px-5 py-4">
                   <h2 className="font-display font-semibold text-sm text-white/80 tracking-wide uppercase">
@@ -171,8 +171,8 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Entity form cards — scrollable column */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar px-4 pb-6 flex flex-col gap-3">
+            {/* Entity form cards — full sidebar scrolls, no per-card scroll */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar px-5 pb-8 flex flex-col gap-4">
               <SubjectsForm />
               <TeachersForm />
               <RoomsForm />
