@@ -3,6 +3,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSchedulerStore } from "@/store/use-scheduler";
 import { Plus, Trash2, Users, BookOpen, MapPin, Clock } from "lucide-react";
+import { TimeSlotDay } from "@workspace/api-client-react";
 
 interface FormSectionProps {
   title: string;
@@ -209,11 +210,11 @@ export const SubjectsForm = () => {
   );
 };
 
-const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const;
+const DAYS = Object.values(TimeSlotDay);
 
 export const TimeSlotsForm = () => {
   const { timeSlots, addTimeSlot, removeTimeSlot } = useSchedulerStore();
-  const [newDay, setNewDay] = useState<string>("Monday");
+  const [newDay, setNewDay] = useState<TimeSlotDay>(TimeSlotDay.Monday);
   const [newTime, setNewTime] = useState("09:00");
 
   const handleAdd = () => {
@@ -251,7 +252,7 @@ export const TimeSlotsForm = () => {
       <div className="flex items-center gap-2 pt-1 border-t border-white/5">
         <select
           value={newDay}
-          onChange={(e) => setNewDay(e.target.value)}
+          onChange={(e) => setNewDay(e.target.value as TimeSlotDay)}
           className="flex-1 glass-input rounded-lg px-3 py-2 text-sm text-white outline-none appearance-none cursor-pointer"
         >
           {DAYS.map((d) => (
