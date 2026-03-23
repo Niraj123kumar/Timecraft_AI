@@ -1,0 +1,867 @@
+# 🧠 MASTER PROMPT — TimeCraft AI Visual Overhaul
+
+*Analyzed from all previous prompts. This is the definitive, battle-tested version.*
+
+---
+
+## 🎯 ROLE & MISSION
+
+```
+You are a world-class Senior UI/UX Designer and Frontend CSS Expert 
+with 10+ years of experience building premium AI SaaS products.
+
+Your ONLY job is to transform the visual appearance of an existing 
+"AI CSP Scheduler" into a premium, futuristic product called 
+"TimeCraft AI" — using CSS ONLY.
+
+Think: Linear.app meets Vercel meets a NASA mission control panel.
+```
+
+---
+
+## ⚠️ ABSOLUTE NON-NEGOTIABLE RULES
+
+```
+RULE 1: DO NOT touch HTML structure (zero new divs, zero removals)
+RULE 2: DO NOT touch JavaScript logic or state
+RULE 3: DO NOT change component structure or layout positioning
+RULE 4: CSS ONLY — global styles, variables, class overrides ONLY
+RULE 5: ZERO overlapping elements — this is your highest priority fix
+RULE 6: ALL text must be 100% visible — no clipping, no truncation
+RULE 7: ALL inputs must be fully visible, never cramped or hidden
+```
+
+---
+
+## 🏷️ REBRANDING (CSS Text Override)
+
+```
+OLD TITLE:    "AI CSP Scheduler"
+NEW TITLE:    "TimeCraft AI"
+
+OLD SUBTITLE: "Constraint Satisfaction Solver Engine"  
+NEW SUBTITLE: "Smart AI-Powered Scheduling Engine"
+
+Title Style:
+  font-size: 36px
+  font-weight: 800
+  background: linear-gradient(135deg, #7c3aed, #ec4899, #3b82f6)
+  -webkit-background-clip: text
+  -webkit-text-fill-color: transparent
+  letter-spacing: -0.5px
+
+Subtitle Style:
+  font-size: 11px
+  font-weight: 500
+  color: #a1a1aa
+  text-transform: uppercase
+  letter-spacing: 0.12em
+```
+
+---
+
+## 🎨 COMPLETE DESIGN SYSTEM
+
+### COLOR PALETTE
+```css
+:root {
+  /* Backgrounds */
+  --bg-primary:       #0d0c10;
+  --bg-secondary:     #13121a;
+  --bg-card:          rgba(30, 30, 40, 0.6);
+  --bg-input:         rgba(0, 0, 0, 0.25);
+  --bg-hover:         rgba(255, 255, 255, 0.04);
+
+  /* Borders */
+  --border-default:   rgba(255, 255, 255, 0.08);
+  --border-focus:     rgba(124, 58, 237, 0.7);
+  --border-hover:     rgba(255, 255, 255, 0.15);
+
+  /* Gradient Accents */
+  --grad-primary:     linear-gradient(135deg, #7c3aed, #ec4899);
+  --grad-full:        linear-gradient(135deg, #7c3aed, #ec4899, #3b82f6);
+  --grad-text:        linear-gradient(135deg, #7c3aed 0%, #ec4899 50%, #3b82f6 100%);
+
+  /* Text */
+  --text-primary:     #f8f8ff;
+  --text-secondary:   #c4c4cc;
+  --text-muted:       #a1a1aa;
+  --text-dimmed:      #71717a;
+
+  /* Glows */
+  --glow-purple:      rgba(124, 58, 237, 0.35);
+  --glow-pink:        rgba(236, 72, 153, 0.30);
+  --glow-blue:        rgba(59, 130, 246, 0.30);
+
+  /* Spacing Scale */
+  --space-xs:         4px;
+  --space-sm:         8px;
+  --space-md:         12px;
+  --space-lg:         16px;
+  --space-xl:         24px;
+  --space-2xl:        32px;
+
+  /* Radius Scale */
+  --radius-sm:        8px;
+  --radius-md:        12px;
+  --radius-lg:        16px;
+  --radius-xl:        20px;
+
+  /* Transitions */
+  --transition-fast:  all 0.15s ease;
+  --transition-base:  all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --transition-slow:  all 0.3s ease;
+}
+```
+
+---
+
+## 🌌 GLOBAL FOUNDATION
+
+```css
+/* ─── BODY & BACKGROUND ─── */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 15px;
+}
+
+body {
+  background-color: var(--bg-primary);
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(124, 58, 237, 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 10%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, rgba(236, 72, 153, 0.06) 0%, transparent 60%);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont,
+               'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── GOOGLE FONT IMPORT ─── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ─── CUSTOM SCROLLBAR ─── */
+::-webkit-scrollbar        { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb  {
+  background: linear-gradient(180deg, #7c3aed, #ec4899);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover { background: #ec4899; }
+* { scrollbar-width: thin; scrollbar-color: #7c3aed #0d0c10; }
+```
+
+---
+
+## 🧊 GLASSMORPHISM CARDS
+
+```css
+/* ─── BASE CARD STYLE ─── */
+/* Apply to: subject-card, teacher-card, room-card,
+   time-slot-card, solver config panel, stats panel,
+   timetable panel, and ALL section containers */
+
+.card,
+.subject-card,
+.teacher-card,
+.room-card,
+.time-slot-card,
+.solver-config,
+.stats-panel,
+.timetable-panel,
+[class*="card"],
+[class*="panel"],
+[class*="section"] {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.4),
+    0 1px 0 rgba(255, 255, 255, 0.05) inset;
+  transition: var(--transition-base);
+  position: relative;
+  overflow: visible;        /* CRITICAL: prevents clipping */
+  min-height: unset;        /* CRITICAL: removes fixed height clipping */
+}
+
+/* ─── CARD HOVER ─── */
+.card:hover,
+.subject-card:hover,
+.teacher-card:hover,
+.room-card:hover,
+.time-slot-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(124, 58, 237, 0.3);
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(124, 58, 237, 0.15),
+    0 0 30px var(--glow-purple);
+}
+
+/* ─── CARD TOP ACCENT LINE ─── */
+.card::before,
+.subject-card::before,
+.teacher-card::before,
+.room-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent, rgba(124, 58, 237, 0.5), transparent);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+/* ─── CARD SPACING (Internal Elements) ─── */
+.card > * + *,
+.subject-card > * + *,
+.teacher-card > * + *,
+.room-card > * + * {
+  margin-top: var(--space-md);
+}
+```
+
+---
+
+## 📝 INPUT FIELDS
+
+```css
+/* ─── ALL INPUTS & SELECTS ─── */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="time"],
+select,
+textarea {
+  width: 100%;
+  padding: 11px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.5;
+  outline: none;
+  transition: var(--transition-base);
+  display: block;
+  min-height: 44px;          /* CRITICAL: ensures touch target */
+  -webkit-appearance: none;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-dimmed);
+  font-size: 13px;
+}
+
+/* ─── FOCUS STATE ─── */
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #7c3aed;
+  box-shadow:
+    0 0 0 3px rgba(124, 58, 237, 0.2),
+    0 0 12px rgba(124, 58, 237, 0.15);
+  background: rgba(124, 58, 237, 0.05);
+}
+
+/* ─── HOVER STATE ─── */
+input:hover:not(:focus),
+select:hover:not(:focus) {
+  border-color: var(--border-hover);
+}
+
+/* ─── SELECT DROPDOWN ─── */
+select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a1a1aa' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+select option {
+  background: #1a1a2e;
+  color: var(--text-primary);
+  padding: 8px;
+}
+
+/* ─── LABELS ─── */
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--space-sm);
+}
+
+/* ─── INPUT GROUP SPACING ─── */
+.input-group,
+.form-group,
+.field-wrapper {
+  margin-bottom: var(--space-lg);
+  width: 100%;
+}
+
+.input-group:last-child,
+.form-group:last-child {
+  margin-bottom: 0;
+}
+```
+
+---
+
+## 🔘 BUTTONS
+
+```css
+/* ─── ALL BUTTONS BASE ─── */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: var(--transition-base);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ─── PRIMARY BUTTON (Generate Schedule) ─── */
+#generate-schedule-btn,
+.btn-primary,
+button[type="submit"],
+.generate-btn {
+  background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+  color: #ffffff;
+  padding: 14px 24px;
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 700;
+  width: 100%;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow:
+    0 4px 20px rgba(124, 58, 237, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  margin-top: var(--space-xl);
+}
+
+/* Primary Shimmer Effect */
+#generate-schedule-btn::before,
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    transparent, rgba(255,255,255,0.15), transparent);
+  transition: left 0.5s ease;
+}
+
+#generate-schedule-btn:hover::before,
+.btn-primary:hover::before {
+  left: 100%;
+}
+
+/* Primary Hover */
+#generate-schedule-btn:hover,
+.btn-primary:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow:
+    0 8px 30px rgba(124, 58, 237, 0.55),
+    0 0 60px rgba(236, 72, 153, 0.2);
+}
+
+/* Primary Active */
+#generate-schedule-btn:active,
+.btn-primary:active {
+  transform: translateY(0) scale(0.99);
+}
+
+/* ─── SECONDARY BUTTONS (Export, Add, etc.) ─── */
+.btn-secondary,
+.export-btn {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+
+.btn-secondary:hover,
+.export-btn:hover {
+  background: rgba(124, 58, 237, 0.1);
+  border-color: rgba(124, 58, 237, 0.4);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+/* ─── ICON BUTTONS (Delete, Add, etc.) ─── */
+.delete-btn,
+.icon-btn,
+button[class*="delete"],
+button[class*="remove"] {
+  background: transparent;
+  color: var(--text-dimmed);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  padding: 0;
+  font-size: 16px;
+  border: 1px solid transparent;
+}
+
+.delete-btn:hover,
+.icon-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  transform: scale(1.1);
+}
+
+/* ─── ADD ITEM BUTTONS ─── */
+.add-btn,
+button[class*="add"] {
+  background: rgba(124, 58, 237, 0.08);
+  color: #a78bfa;
+  border: 1px dashed rgba(124, 58, 237, 0.3);
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  width: 100%;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: var(--space-md);
+}
+
+.add-btn:hover,
+button[class*="add"]:hover {
+  background: rgba(124, 58, 237, 0.15);
+  border-color: rgba(124, 58, 237, 0.6);
+  color: #c4b5fd;
+  transform: translateY(-1px);
+}
+```
+
+---
+
+## 📊 STATS CARDS
+
+```css
+/* ─── STATS CONTAINER ─── */
+.stats-container,
+.stats-grid,
+[class*="stats"] {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+/* ─── INDIVIDUAL STAT CARD ─── */
+.stat-card,
+[class*="stat-item"],
+[class*="metric"] {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg) var(--space-xl);
+  transition: var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--grad-primary);
+  opacity: 0;
+  transition: var(--transition-base);
+}
+
+.stat-card:hover::after { opacity: 1; }
+
+/* ─── STAT NUMBER ─── */
+.stat-number,
+.stat-value,
+[class*="stat"] > span:first-child,
+[class*="metric"] > strong {
+  display: block;
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.1;
+  background: var(--grad-full);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: var(--space-xs);
+}
+
+/* ─── STAT LABEL ─── */
+.stat-label,
+[class*="stat"] > span:last-child {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+```
+
+---
+
+## 📅 TIMETABLE GRID
+
+```css
+/* ─── TIMETABLE WRAPPER ─── */
+.timetable-wrapper,
+.timetable-container,
+[class*="timetable"] {
+  overflow-x: auto;
+  border-radius: var(--radius-lg);
+  scrollbar-width: thin;
+}
+
+/* ─── GRID TABLE ─── */
+.timetable-grid,
+.schedule-grid,
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 3px;
+  min-width: 600px;
+}
+
+/* ─── TABLE HEADERS ─── */
+th {
+  background: rgba(124, 58, 237, 0.1);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 10px 12px;
+  text-align: center;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+}
+
+/* ─── TABLE CELLS ─── */
+td {
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-sm);
+  padding: 6px;
+  vertical-align: top;
+  min-width: 100px;
+  transition: var(--transition-base);
+}
+
+/* ─── OCCUPIED CLASS CELLS ─── */
+td:not(:empty),
+.class-block,
+.scheduled-class,
+[class*="class-cell"]:not(:empty) {
+  background: linear-gradient(135deg,
+    rgba(124, 58, 237, 0.15),
+    rgba(236, 72, 153, 0.10));
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--text-primary);
+  line-height: 1.5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+td:not(:empty):hover {
+  background: linear-gradient(135deg,
+    rgba(124, 58, 237, 0.25),
+    rgba(236, 72, 153, 0.18));
+  transform: scale(1.02);
+}
+
+/* ─── EMPTY / FREE SLOTS ─── */
+td:empty {
+  background: rgba(255, 255, 255, 0.01);
+  border-color: rgba(255, 255, 255, 0.03);
+}
+
+/* ─── TIME COLUMN ─── */
+td:first-child, th:first-child {
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 12px;
+  min-width: 80px;
+  text-align: center;
+}
+```
+
+---
+
+## 🧭 SIDEBAR & LAYOUT
+
+```css
+/* ─── SIDEBAR (Input Panel) ─── */
+.sidebar,
+.input-panel,
+.left-panel,
+[class*="sidebar"] {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #7c3aed transparent;
+  padding-right: var(--space-sm);
+}
+
+/* ─── SECTION HEADERS ─── */
+.section-header,
+.panel-title,
+h2, h3 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* ─── SECTION SPACING ─── */
+.section,
+.config-section,
+[class*="section"] {
+  margin-bottom: var(--space-2xl);
+}
+
+/* ─── ITEMS LIST (Subjects, Teachers, Rooms) ─── */
+.items-list,
+[class*="list"] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* ─── INDIVIDUAL ITEM ROW ─── */
+.item-row,
+[class*="item"] {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+}
+
+.item-row input,
+[class*="item"] input {
+  flex: 1;
+  min-width: 0;             /* CRITICAL: prevents overflow */
+}
+```
+
+---
+
+## 🔔 NOTIFICATIONS & ALERTS
+
+```css
+/* ─── SUCCESS ALERT ─── */
+.alert-success,
+.notification-success,
+[class*="success"] {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  color: #86efac;
+  font-size: 14px;
+}
+
+/* ─── ERROR ALERT ─── */
+.alert-error,
+.notification-error,
+[class*="error"] {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  color: #fca5a5;
+  font-size: 14px;
+}
+
+/* ─── INFO ALERT ─── */
+.alert-info,
+[class*="info"] {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  color: #93c5fd;
+  font-size: 14px;
+}
+```
+
+---
+
+## ✨ LOADING & ANIMATIONS
+
+```css
+/* ─── KEYFRAMES ─── */
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 20px var(--glow-purple); }
+  50%       { box-shadow: 0 0 40px var(--glow-purple), 0 0 80px var(--glow-pink); }
+}
+
+/* ─── APPLY ANIMATIONS ─── */
+.card,
+.subject-card,
+.teacher-card,
+.room-card,
+.time-slot-card {
+  animation: fadeInUp 0.4s ease both;
+}
+
+/* ─── LOADING STATE ─── */
+.loading,
+[class*="loading"] {
+  animation: pulse 1.5s infinite;
+}
+
+/* ─── GRADIENT TITLE ANIMATION ─── */
+h1,
+.app-title,
+.brand-title {
+  background-size: 200% 200%;
+  animation: gradientShift 4s ease infinite;
+}
+```
+
+---
+
+## 🩹 CRITICAL OVERFLOW FIXES
+
+```css
+/* ─── PREVENT ALL CLIPPING ─── */
+* {
+  min-height: 0;
+  min-width: 0;
+}
+
+/* ─── REMOVE PROBLEMATIC FIXED HEIGHTS ─── */
+.card,
+.panel,
+[class*="card"],
+[class*="panel"] {
+  height: auto !important;
+  max-height: none;
+  overflow: visible;
+}
+
+/* ─── ENSURE TEXT NEVER CLIPS ─── */
+input,
+label,
+p,
+span,
+.teacher-name,
+.subject-name,
+.room-name,
+.time-slot {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  min-height: unset;
+}
+
+/* ─── FLEX CHILDREN WON'T OVERFLOW ─── */
+.flex-row,
+[class*="row"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+.flex-row > * {
+  min-width: 0;
+  flex-shrink: 1;
+}
+```
+
+---
+
+## 📋 REPLIT PASTE INSTRUCTIONS
+
+```
+STEP 1: Open your Replit project
+STEP 2: Open style.css (or create one)
+STEP 3: Add this to your index.html <head>:
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+STEP 4: Paste the ENTIRE CSS above into style.css
+STEP 5: Hit Run — your app is now TimeCraft AI ✅
+
+TROUBLESHOOTING:
+  → If a component doesn't match, add its
+    exact class name to the relevant CSS rule
+  → Use browser DevTools (F12) to inspect
+    element class names and add them to selectors
+  → All !important flags are intentional —
+    they override existing conflicting styles
+```
+
+---
+
+> **🎯 Result:** A premium, futuristic AI SaaS interface with zero structural changes — looks like a $10M funded product, built entirely through CSS mastery.
