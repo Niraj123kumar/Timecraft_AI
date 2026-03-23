@@ -16,7 +16,8 @@ export default function Dashboard() {
   const [showSettings, setShowSettings] = useState(false);
   const [showTrace, setShowTrace] = useState(false);
 
-  const canGenerate = store.subjects.length > 0 && store.teachers.length > 0 && store.rooms.length > 0 && store.timeSlots.length > 0;
+  const subjectsWithoutTeacher = store.subjects.filter(s => !s.teacherId || !store.teachers.find(t => t.id === s.teacherId));
+  const canGenerate = store.subjects.length > 0 && store.teachers.length > 0 && store.rooms.length > 0 && store.timeSlots.length > 0 && subjectsWithoutTeacher.length === 0;
 
   const handleGenerate = () => {
     setSolutionIdx(0);
@@ -120,7 +121,11 @@ export default function Dashboard() {
                 </button>
                 
                 {!canGenerate && (
-                  <p className="text-xs text-warning mt-3 text-center">Add at least one of each entity to generate.</p>
+                  <p className="text-xs text-warning mt-3 text-center">
+                    {subjectsWithoutTeacher.length > 0
+                      ? `${subjectsWithoutTeacher.length} subject(s) have no valid teacher assigned.`
+                      : "Add at least one subject, teacher, room, and time slot."}
+                  </p>
                 )}
               </div>
             </div>

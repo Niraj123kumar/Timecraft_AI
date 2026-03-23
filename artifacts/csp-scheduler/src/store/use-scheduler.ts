@@ -82,7 +82,15 @@ export const useSchedulerStore = create<StoreState>((set) => ({
   updateTeacher: (id, updates) => set((state) => ({
     teachers: state.teachers.map(t => t.id === id ? { ...t, ...updates } : t)
   })),
-  removeTeacher: (id) => set((state) => ({ teachers: state.teachers.filter(t => t.id !== id) })),
+  removeTeacher: (id) => set((state) => {
+    const remainingTeachers = state.teachers.filter(t => t.id !== id);
+    const fallbackTeacherId = remainingTeachers[0]?.id ?? "";
+    // Reassign subjects that referenced the removed teacher to the first remaining teacher
+    const updatedSubjects = state.subjects.map(s =>
+      s.teacherId === id ? { ...s, teacherId: fallbackTeacherId } : s
+    );
+    return { teachers: remainingTeachers, subjects: updatedSubjects };
+  }),
   
   addRoom: (r) => set((state) => ({ rooms: [...state.rooms, { ...r, id: uuidv4() }] })),
   updateRoom: (id, updates) => set((state) => ({

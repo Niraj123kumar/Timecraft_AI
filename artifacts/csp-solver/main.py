@@ -165,6 +165,20 @@ class CSPSolver:
         self.rooms_map: dict[str, Room] = {r.id: r for r in rooms}
         self.time_slots_map: dict[str, TimeSlot] = {ts.id: ts for ts in time_slots}
 
+        # Validate referential integrity before running the solver
+        for subj in subjects:
+            if subj.teacherId not in self.teachers_map:
+                raise ValueError(
+                    f"Subject '{subj.name}' references teacher ID '{subj.teacherId}' which does not exist. "
+                    "Please assign a valid teacher to every subject."
+                )
+            for slot_id in self.teachers_map[subj.teacherId].availableSlots:
+                if slot_id not in self.time_slots_map:
+                    raise ValueError(
+                        f"Teacher '{self.teachers_map[subj.teacherId].name}' has an available slot ID "
+                        f"'{slot_id}' that does not match any defined time slot."
+                    )
+
         self.max_solutions = max_solutions
         self.include_steps = include_steps
 
