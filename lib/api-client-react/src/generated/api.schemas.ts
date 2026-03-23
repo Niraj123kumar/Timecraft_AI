@@ -116,9 +116,9 @@ export interface CspResponse {
   success: boolean;
   solutions: TimetableEntry[][];
   solutionsFound: number;
-  steps?: SolvingStep[];
+  steps?: SolvingStep[] | null;
   stats: SolverStats;
-  message?: string;
+  message?: string | null;
 }
 
 export interface ErrorResponse {

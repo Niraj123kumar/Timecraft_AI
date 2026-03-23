@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Settings2, AlertTriangle, RefreshCcw } from "lucide-react";
 import { useSchedulerStore } from "@/store/use-scheduler";
 import { useSolveCsp } from "@workspace/api-client-react";
-import { TeachersForm, RoomsForm, SubjectsForm } from "@/components/forms/EntityForms";
+import { TeachersForm, RoomsForm, SubjectsForm, TimeSlotsForm } from "@/components/forms/EntityForms";
 import { TimetableGrid } from "@/components/timetable/TimetableGrid";
 import { SolvingTrace } from "@/components/timetable/SolvingTrace";
 import { StatsBar } from "@/components/timetable/StatsBar";
@@ -128,7 +128,7 @@ export default function Dashboard() {
             <SubjectsForm />
             <TeachersForm />
             <RoomsForm />
-            {/* Keeping TimeSlots simple for UI sake, as it's static in defaults, but could be editable */}
+            <TimeSlotsForm />
             
           </div>
 

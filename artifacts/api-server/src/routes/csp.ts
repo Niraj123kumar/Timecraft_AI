@@ -1,26 +1,15 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { SolveCspBody } from "@workspace/api-zod";
+import { SolveCspBody, SolveCspResponse } from "@workspace/api-zod";
 
 const router: IRouter = Router();
 
 const CSP_SERVICE_URL = process.env.CSP_SERVICE_URL || "http://localhost:8001";
 
-async function proxyCsp(req: Request, res: Response, path: string) {
+async function proxyGet(req: Request, res: Response, path: string): Promise<void> {
   const url = `${CSP_SERVICE_URL}${path}`;
   try {
-    const fetchOptions: RequestInit = {
-      method: req.method,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
-
-    if (req.method !== "GET" && req.method !== "HEAD") {
-      fetchOptions.body = JSON.stringify(req.body);
-    }
-
-    const upstream = await fetch(url, fetchOptions);
-    const data = await upstream.json();
+    const upstream = await fetch(url, { method: "GET", headers: { "Content-Type": "application/json" } });
+    const data: unknown = await upstream.json();
     res.status(upstream.status).json(data);
   } catch (err) {
     req.log.error({ err, url }, "CSP service proxy error");
@@ -29,7 +18,7 @@ async function proxyCsp(req: Request, res: Response, path: string) {
 }
 
 router.get("/csp/health", async (req, res) => {
-  await proxyCsp(req, res, "/csp/health");
+  await proxyGet(req, res, "/csp/health");
 });
 
 router.post("/csp/solve", async (req, res) => {
@@ -41,7 +30,37 @@ router.post("/csp/solve", async (req, res) => {
     });
     return;
   }
-  await proxyCsp(req, res, "/csp/solve");
+
+  const url = `${CSP_SERVICE_URL}/csp/solve`;
+  try {
+    const upstream = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(parseResult.data),
+    });
+
+    const rawData: unknown = await upstream.json();
+
+    if (!upstream.ok) {
+      res.status(upstream.status).json(rawData);
+      return;
+    }
+
+    const responseResult = SolveCspResponse.safeParse(rawData);
+    if (!responseResult.success) {
+      req.log.error({ issues: responseResult.error.issues }, "CSP solver response failed schema validation");
+      res.status(502).json({
+        error: "Invalid response from CSP solver service",
+        details: responseResult.error.message,
+      });
+      return;
+    }
+
+    res.status(200).json(responseResult.data);
+  } catch (err) {
+    req.log.error({ err, url }, "CSP service proxy error");
+    res.status(502).json({ error: "CSP solver service unavailable", details: String(err) });
+  }
 });
 
 export default router;

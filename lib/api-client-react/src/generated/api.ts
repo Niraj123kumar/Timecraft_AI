@@ -109,6 +109,74 @@ export function useHealthCheck<
 }
 
 /**
+ * Returns health status of the CSP solver service
+ * @summary CSP solver service health check
+ */
+export const getCspHealthUrl = () => {
+  return `/api/csp/health`;
+};
+
+export const cspHealth = async (
+  options?: RequestInit,
+): Promise<HealthStatus> => {
+  return customFetch<HealthStatus>(getCspHealthUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getCspHealthQueryKey = () => {
+  return [`/api/csp/health`] as const;
+};
+
+export const getCspHealthQueryOptions = <
+  TData = Awaited<ReturnType<typeof cspHealth>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof cspHealth>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getCspHealthQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof cspHealth>>> = ({
+    signal,
+  }) => cspHealth({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof cspHealth>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type CspHealthQueryResult = NonNullable<
+  Awaited<ReturnType<typeof cspHealth>>
+>;
+export type CspHealthQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary CSP solver service health check
+ */
+
+export function useCspHealth<
+  TData = Awaited<ReturnType<typeof cspHealth>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof cspHealth>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getCspHealthQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
  * Runs the CSP solver with backtracking, forward checking, constraint propagation, MRV and degree heuristics to produce valid timetables.
  * @summary Solve a CSP scheduling problem
  */

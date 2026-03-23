@@ -16,6 +16,14 @@ export const HealthCheckResponse = zod.object({
 });
 
 /**
+ * Returns health status of the CSP solver service
+ * @summary CSP solver service health check
+ */
+export const CspHealthResponse = zod.object({
+  status: zod.string(),
+});
+
+/**
  * Runs the CSP solver with backtracking, forward checking, constraint propagation, MRV and degree heuristics to produce valid timetables.
  * @summary Solve a CSP scheduling problem
  */
@@ -131,12 +139,12 @@ export const SolveCspResponse = zod.object({
         domainsRemaining: zod.record(zod.string(), zod.number()).optional(),
       }),
     )
-    .optional(),
+    .nullish(),
   stats: zod.object({
     assignments: zod.number(),
     backtracks: zod.number(),
     propagations: zod.number(),
     timeMs: zod.number(),
   }),
-  message: zod.string().optional(),
+  message: zod.string().nullish(),
 });

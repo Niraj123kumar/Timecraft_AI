@@ -26,6 +26,25 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /csp/health:
+    get:
+      operationId: cspHealth
+      tags: [csp]
+      summary: CSP solver service health check
+      description: Returns health status of the CSP solver service
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+        "502":
+          description: CSP solver service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /csp/solve:
     post:
       operationId: solveCsp
@@ -249,12 +268,14 @@ components:
           type: integer
         steps:
           type: array
+          nullable: true
           items:
             $ref: "#/components/schemas/SolvingStep"
         stats:
           $ref: "#/components/schemas/SolverStats"
         message:
           type: string
+          nullable: true
       required:
         - success
         - solutions

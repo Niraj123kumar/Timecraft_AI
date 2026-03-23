@@ -4,13 +4,15 @@ AI Constraint Satisfaction Problem (CSP) Solver — FastAPI Service
 Implements:
 - Backtracking Search
 - Forward Checking
-- Constraint Propagation (AC-3)
+- Arc Consistency (AC-3) constraint propagation
 - MRV (Minimum Remaining Values) heuristic
-- Degree Heuristic
+- Degree Heuristic (tiebreaker for MRV)
+- LCV (Least Constraining Value) ordering
 """
 
 import os
 import time
+from collections import deque
 from typing import Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -104,6 +106,37 @@ class CspResponse(BaseModel):
 
 # ─── CSP Engine ─────────────────────────────────────────────────────────────
 
+# A variable is (subject_id, session_index).
+# A value is (time_slot_id, room_id).
+Variable = tuple[str, int]
+Value = tuple[str, str]
+Domain = list[Value]
+Domains = dict[Variable, Domain]
+
+
+def _conflicts(
+    subj_a: Subject,
+    val_a: Value,
+    subj_b: Subject,
+    val_b: Value,
+) -> bool:
+    """Return True if assigning val_a to subj_a's variable conflicts with val_b for subj_b."""
+    ts_a, room_a = val_a
+    ts_b, room_b = val_b
+    if ts_a != ts_b:
+        return False
+    # Same room at same time
+    if room_a == room_b:
+        return True
+    # Same teacher at same time
+    if subj_a.teacherId == subj_b.teacherId:
+        return True
+    # Same subject (different session) at same time
+    if subj_a.id == subj_b.id:
+        return True
+    return False
+
+
 class CSPSolver:
     """
     Models the timetable scheduling problem as a CSP:
@@ -112,7 +145,10 @@ class CSPSolver:
     - Constraints:
         1. No two classes in the same time slot in the same room
         2. No teacher teaching two classes at the same time
-        3. Teacher must be available for the time slot
+        3. Teacher must be available for the time slot (if availableSlots is set)
+        4. Same subject cannot appear twice in the same time slot
+
+    Algorithm: Backtracking + Forward Checking + AC-3 propagation + MRV/Degree + LCV
     """
 
     def __init__(
@@ -124,286 +160,338 @@ class CSPSolver:
         max_solutions: int = 3,
         include_steps: bool = False,
     ):
-        self.subjects = {s.id: s for s in subjects}
-        self.teachers = {t.id: t for t in teachers}
-        self.rooms = {r.id: r for r in rooms}
-        self.time_slots = {ts.id: ts for ts in time_slots}
+        self.subjects_map: dict[str, Subject] = {s.id: s for s in subjects}
+        self.teachers_map: dict[str, Teacher] = {t.id: t for t in teachers}
+        self.rooms_map: dict[str, Room] = {r.id: r for r in rooms}
+        self.time_slots_map: dict[str, TimeSlot] = {ts.id: ts for ts in time_slots}
 
         self.max_solutions = max_solutions
         self.include_steps = include_steps
 
-        self.stats = {"assignments": 0, "backtracks": 0, "propagations": 0}
+        self.stats: dict[str, int] = {"assignments": 0, "backtracks": 0, "propagations": 0}
         self.steps: list[SolvingStep] = []
         self.step_counter = 0
 
         # Build variables: each (subject_id, session_number) that needs a slot+room
-        self.variables: list[tuple[str, int]] = []
+        self.variables: list[Variable] = []
         for s in subjects:
             for i in range(s.sessionsPerWeek):
                 self.variables.append((s.id, i))
 
-        # Build domains: for each variable, list valid (time_slot_id, room_id) pairs
-        self.domains: dict[tuple[str, int], list[tuple[str, str]]] = {}
+        # Build initial domains for each variable
+        self.initial_domains: Domains = {}
         for var in self.variables:
             subj_id, _ = var
-            subj = self.subjects[subj_id]
-            teacher = self.teachers[subj.teacherId]
-            allowed_slots = set(teacher.availableSlots) if teacher.availableSlots else set(time_slots_for_teacher := {ts.id for ts in time_slots})
+            subj = self.subjects_map[subj_id]
+            teacher = self.teachers_map[subj.teacherId]
+
+            # Restrict to teacher's available slots, or all slots if none specified
             if teacher.availableSlots:
-                allowed_slots = set(teacher.availableSlots)
+                allowed_slot_ids = {sid for sid in teacher.availableSlots if sid in self.time_slots_map}
             else:
-                allowed_slots = {ts.id for ts in time_slots}
+                allowed_slot_ids = set(self.time_slots_map.keys())
 
-            domain = []
-            for ts_id in allowed_slots:
-                if ts_id in self.time_slots:
-                    for r in rooms:
-                        domain.append((ts_id, r.id))
-            self.domains[var] = domain
+            domain: Domain = []
+            for ts_id in allowed_slot_ids:
+                for r in rooms:
+                    domain.append((ts_id, r.id))
+            self.initial_domains[var] = domain
 
-        # Deep copy domains for forward checking
-        self.working_domains: dict[tuple[str, int], list[tuple[str, str]]] = {
-            var: list(dom) for var, dom in self.domains.items()
-        }
+    # ── Logging ────────────────────────────────────────────────────────────
 
-    def _add_step(self, action: str, variable: tuple[str, int], value: str, message: str):
+    def _add_step(
+        self, action: str, variable: Variable, value: str, message: str, domains: Domains
+    ) -> None:
         if not self.include_steps:
             return
         self.step_counter += 1
-        remaining = {f"{v[0]}#{v[1]}": len(d) for v, d in self.working_domains.items()}
+        remaining = {f"{v[0]}#{v[1]}": len(d) for v, d in domains.items()}
+        subj_name = self.subjects_map[variable[0]].name
         self.steps.append(
             SolvingStep(
                 stepNumber=self.step_counter,
                 action=action,
-                variable=f"{self.subjects[variable[0]].name} (session {variable[1]+1})",
+                variable=f"{subj_name} (session {variable[1] + 1})",
                 value=value,
                 message=message,
                 domainsRemaining=remaining,
             )
         )
 
-    def _is_consistent(self, assignment: dict, var: tuple[str, int], value: tuple[str, str]) -> bool:
-        """Check if assigning value to var is consistent with current assignment."""
-        ts_id, room_id = value
-        subj_id, _ = var
-        subj = self.subjects[subj_id]
+    # ── Consistency helpers ────────────────────────────────────────────────
 
+    def _is_consistent(
+        self, assignment: dict[Variable, Value], var: Variable, value: Value
+    ) -> bool:
+        """Check if assigning value to var is consistent with the current assignment."""
+        subj = self.subjects_map[var[0]]
         for assigned_var, assigned_val in assignment.items():
-            assigned_ts_id, assigned_room_id = assigned_val
-            assigned_subj_id, _ = assigned_var
-
-            # Same time slot constraint
-            if assigned_ts_id == ts_id:
-                # Same room conflict
-                if assigned_room_id == room_id:
-                    return False
-                # Same teacher conflict
-                assigned_subj = self.subjects[assigned_subj_id]
-                if assigned_subj.teacherId == subj.teacherId:
-                    return False
-
-        # No same subject twice in same time slot
-        for assigned_var, assigned_val in assignment.items():
-            if assigned_var[0] == subj_id and assigned_val[0] == ts_id:
+            other_subj = self.subjects_map[assigned_var[0]]
+            if _conflicts(subj, value, other_subj, assigned_val):
                 return False
+        return True
+
+    # ── AC-3 Constraint Propagation ────────────────────────────────────────
+
+    def _revise(
+        self, domains: Domains, var_i: Variable, var_j: Variable
+    ) -> bool:
+        """
+        AC-3 revise step: remove values from domain of var_i that have no
+        support in the domain of var_j.  Returns True if the domain was revised.
+        """
+        subj_i = self.subjects_map[var_i[0]]
+        subj_j = self.subjects_map[var_j[0]]
+        revised = False
+        to_remove: list[Value] = []
+
+        for val_i in domains[var_i]:
+            # Check if there is at least one value in domain(var_j) consistent with val_i
+            has_support = any(
+                not _conflicts(subj_i, val_i, subj_j, val_j)
+                for val_j in domains[var_j]
+            )
+            if not has_support:
+                to_remove.append(val_i)
+                revised = True
+
+        for val in to_remove:
+            domains[var_i].remove(val)
+            self.stats["propagations"] += 1
+
+        return revised
+
+    def _ac3(self, domains: Domains, seed_vars: Optional[list[Variable]] = None) -> bool:
+        """
+        Run AC-3 on the given domains.
+        If seed_vars is provided, only initialise the queue with arcs from those variables.
+        Returns False if any domain is wiped out (unsatisfiable), True otherwise.
+        """
+        # Build initial arc queue
+        if seed_vars is not None:
+            queue: deque[tuple[Variable, Variable]] = deque()
+            for v in seed_vars:
+                for other in self.variables:
+                    if other != v:
+                        queue.append((other, v))
+        else:
+            queue = deque(
+                (vi, vj)
+                for vi in self.variables
+                for vj in self.variables
+                if vi != vj
+            )
+
+        while queue:
+            var_i, var_j = queue.popleft()
+            if var_i not in domains or var_j not in domains:
+                continue
+            if self._revise(domains, var_i, var_j):
+                if not domains[var_i]:
+                    return False  # Domain wipe-out
+                # Re-add all arcs pointing to var_i (except from var_j)
+                for var_k in self.variables:
+                    if var_k != var_i and var_k != var_j:
+                        queue.append((var_k, var_i))
 
         return True
 
+    # ── Forward Checking ────────────────────────────────────────────────────
+
     def _forward_check(
         self,
-        assignment: dict,
-        var: tuple[str, int],
-        value: tuple[str, str],
-        working_domains: dict,
-    ) -> tuple[bool, dict[tuple[str, int], list[tuple[str, str]]]]:
+        assignment: dict[Variable, Value],
+        var: Variable,
+        value: Value,
+        domains: Domains,
+    ) -> tuple[bool, Domains]:
         """
-        Forward checking: after assigning var=value, remove inconsistent
-        values from unassigned variable domains.
-        Returns (still_feasible, pruned_domains).
+        After assigning var=value, prune values from unassigned variables' domains
+        that are now inconsistent.  Applies AC-3 seeded at `var` for full propagation.
+        Returns (still_feasible, updated_domains).
         """
-        ts_id, room_id = value
-        subj_id, _ = var
-        subj = self.subjects[subj_id]
+        subj = self.subjects_map[var[0]]
+        new_domains: Domains = {k: list(v) for k, v in domains.items()}
 
-        pruned: dict[tuple[str, int], list[tuple[str, str]]] = {}
-        new_domains = {k: list(v) for k, v in working_domains.items()}
-
+        # Initial prune: remove values from unassigned variables that directly conflict
         for other_var in self.variables:
             if other_var in assignment or other_var == var:
                 continue
-            other_subj_id, _ = other_var
-            other_subj = self.subjects[other_subj_id]
-
-            to_remove = []
-            for val in new_domains[other_var]:
-                other_ts_id, other_room_id = val
-                conflict = False
-                if other_ts_id == ts_id:
-                    if other_room_id == room_id:
-                        conflict = True
-                    elif other_subj.teacherId == subj.teacherId:
-                        conflict = True
-                if other_var[0] == subj_id and other_ts_id == ts_id:
-                    conflict = True
-                if conflict:
-                    to_remove.append(val)
-
+            other_subj = self.subjects_map[other_var[0]]
+            to_remove: list[Value] = [
+                val for val in new_domains[other_var]
+                if _conflicts(subj, value, other_subj, val)
+            ]
             for val in to_remove:
                 new_domains[other_var].remove(val)
-                pruned.setdefault(other_var, []).append(val)
                 self.stats["propagations"] += 1
 
             if not new_domains[other_var]:
-                # Domain wipe-out — backtrack
-                return False, pruned
+                return False, new_domains  # Domain wipe-out
+
+        # Full AC-3 propagation seeded from var's neighbours
+        unassigned_vars = [v for v in self.variables if v not in assignment and v != var]
+        if unassigned_vars:
+            ac3_domains = {v: list(new_domains[v]) for v in unassigned_vars}
+            ok = self._ac3(ac3_domains, seed_vars=[var])
+            if not ok:
+                return False, new_domains
+            for v in unassigned_vars:
+                new_domains[v] = ac3_domains[v]
 
         return True, new_domains
 
-    def _select_unassigned_variable(self, assignment: dict, working_domains: dict) -> tuple[str, int]:
+    # ── Variable / Value Ordering ───────────────────────────────────────────
+
+    def _select_unassigned_variable(
+        self, assignment: dict[Variable, Value], domains: Domains
+    ) -> Variable:
         """
-        Variable ordering using:
-        1. MRV (Minimum Remaining Values): pick variable with smallest domain
-        2. Degree heuristic as tiebreaker: pick variable involved in most constraints
+        Variable ordering:
+        1. MRV: pick the variable with the fewest remaining values
+        2. Degree (tiebreaker): pick the variable involved in most constraints
+           with other unassigned variables
         """
         unassigned = [v for v in self.variables if v not in assignment]
 
-        def mrv_score(v):
-            return len(working_domains[v])
-
-        def degree_score(v):
-            """Count how many unassigned variables share constraints with v."""
-            subj_id, _ = v
-            subj = self.subjects[subj_id]
+        def degree(v: Variable) -> int:
+            subj = self.subjects_map[v[0]]
             count = 0
             for other in unassigned:
                 if other == v:
                     continue
-                other_subj_id, _ = other
-                other_subj = self.subjects[other_subj_id]
-                if other_subj.teacherId == subj.teacherId or other_subj_id == subj_id:
+                other_subj = self.subjects_map[other[0]]
+                # Constraint exists if same teacher or same subject
+                if other_subj.teacherId == subj.teacherId or other_subj.id == subj.id:
                     count += 1
             return count
 
-        # Sort by MRV first, then by degree (negated, larger = better)
-        unassigned.sort(key=lambda v: (mrv_score(v), -degree_score(v)))
+        unassigned.sort(key=lambda v: (len(domains[v]), -degree(v)))
         return unassigned[0]
 
-    def _order_domain_values(self, var: tuple[str, int], working_domains: dict, assignment: dict) -> list:
+    def _order_domain_values(
+        self, var: Variable, domains: Domains, assignment: dict[Variable, Value]
+    ) -> list[Value]:
         """
-        Least Constraining Value (LCV) ordering: prefer values that
-        leave more options for unassigned variables.
+        LCV (Least Constraining Value): prefer values that eliminate
+        the fewest options from neighbouring unassigned variables.
         """
-        def constraint_count(value):
-            ts_id, room_id = value
-            subj_id, _ = var
-            subj = self.subjects[subj_id]
+        subj = self.subjects_map[var[0]]
+
+        def constraint_count(value: Value) -> int:
             count = 0
             for other_var in self.variables:
                 if other_var in assignment or other_var == var:
                     continue
-                other_subj_id, _ = other_var
-                other_subj = self.subjects[other_subj_id]
-                for val in working_domains[other_var]:
-                    other_ts_id, other_room_id = val
-                    if other_ts_id == ts_id:
-                        if other_room_id == room_id or other_subj.teacherId == subj.teacherId:
-                            count += 1
+                other_subj = self.subjects_map[other_var[0]]
+                count += sum(
+                    1 for val in domains[other_var]
+                    if _conflicts(subj, value, other_subj, val)
+                )
             return count
 
-        return sorted(working_domains[var], key=constraint_count)
+        return sorted(domains[var], key=constraint_count)
+
+    # ── Backtracking Search ─────────────────────────────────────────────────
 
     def _backtrack(
         self,
-        assignment: dict,
-        working_domains: dict,
-        solutions: list,
+        assignment: dict[Variable, Value],
+        domains: Domains,
+        solutions: list[list[TimetableEntry]],
     ) -> None:
-        """Main backtracking search with forward checking."""
+        """Main recursive backtracking search with forward checking + AC-3."""
         if len(solutions) >= self.max_solutions:
             return
 
-        # All variables assigned — solution found
         if len(assignment) == len(self.variables):
-            solution = self._build_solution(assignment)
-            solutions.append(solution)
+            solutions.append(self._build_solution(assignment))
             return
 
-        var = self._select_unassigned_variable(assignment, working_domains)
+        var = self._select_unassigned_variable(assignment, domains)
 
-        for value in self._order_domain_values(var, working_domains, assignment):
+        for value in self._order_domain_values(var, domains, assignment):
             ts_id, room_id = value
-            ts = self.time_slots[ts_id]
-            room = self.rooms[room_id]
-            subj = self.subjects[var[0]]
-            val_str = f"{ts.label or ts.day+' '+ts.time} in {room.name}"
+            ts = self.time_slots_map[ts_id]
+            room = self.rooms_map[room_id]
+            subj = self.subjects_map[var[0]]
+            val_str = f"{ts.label or ts.day + ' ' + ts.time} in {room.name}"
 
-            if self._is_consistent(assignment, var, value):
-                assignment[var] = value
-                self.stats["assignments"] += 1
-                self._add_step(
-                    "assign", var, val_str,
-                    f"Assigned {subj.name} (session {var[1]+1}) → {val_str}"
-                )
+            if not self._is_consistent(assignment, var, value):
+                continue
 
-                # Forward checking
-                feasible, new_domains = self._forward_check(assignment, var, value, working_domains)
+            assignment[var] = value
+            self.stats["assignments"] += 1
+            self._add_step("assign", var, val_str,
+                           f"Assigned {subj.name} (session {var[1] + 1}) → {val_str}", domains)
 
-                if feasible:
-                    if self.include_steps:
-                        self._add_step(
-                            "forward_check", var, val_str,
-                            f"Forward check passed; pruned {sum(len(p) for p in new_domains.values())} values"
-                        )
-                    self._backtrack(assignment, new_domains, solutions)
-                else:
+            feasible, new_domains = self._forward_check(assignment, var, value, domains)
+
+            if feasible:
+                if self.include_steps:
                     self._add_step(
                         "propagate", var, val_str,
-                        f"Forward check failed — domain wipe-out detected"
+                        f"AC-3 propagation passed; remaining domain sizes stable",
+                        new_domains,
                     )
-
-                # Undo assignment
-                del assignment[var]
+                self._backtrack(assignment, new_domains, solutions)
             else:
-                pass  # Skip inconsistent values
+                self._add_step(
+                    "forward_check", var, val_str,
+                    f"Domain wipe-out detected after AC-3 — pruning branch",
+                    domains,
+                )
 
-        # All values tried — backtrack
-        if var not in assignment:
-            self.stats["backtracks"] += 1
-            self._add_step(
-                "backtrack", var, "",
-                f"Backtracking from {self.subjects[var[0]].name} (session {var[1]+1}) — no valid value"
-            )
+            del assignment[var]
 
-    def _build_solution(self, assignment: dict) -> list[TimetableEntry]:
-        """Convert assignment dict to list of TimetableEntry."""
-        entries = []
+        # All values tried without success — backtrack
+        self.stats["backtracks"] += 1
+        self._add_step(
+            "backtrack", var, "",
+            f"Backtracking from {self.subjects_map[var[0]].name} (session {var[1] + 1}) — no valid value",
+            domains,
+        )
+
+    # ── Solution Building ───────────────────────────────────────────────────
+
+    def _build_solution(self, assignment: dict[Variable, Value]) -> list[TimetableEntry]:
+        """Convert assignment dict to a sorted list of TimetableEntry objects."""
+        entries: list[TimetableEntry] = []
         for var, value in assignment.items():
             subj_id, _ = var
             ts_id, room_id = value
-            subj = self.subjects[subj_id]
-            teacher = self.teachers[subj.teacherId]
-            room = self.rooms[room_id]
-            ts = self.time_slots[ts_id]
-            entries.append(TimetableEntry(
-                subjectId=subj_id,
-                subjectName=subj.name,
-                teacherId=subj.teacherId,
-                teacherName=teacher.name,
-                roomId=room_id,
-                roomName=room.name,
-                timeSlotId=ts_id,
-                day=ts.day,
-                time=ts.time,
-                label=ts.label or f"{ts.day} {ts.time}",
-            ))
+            subj = self.subjects_map[subj_id]
+            teacher = self.teachers_map[subj.teacherId]
+            room = self.rooms_map[room_id]
+            ts = self.time_slots_map[ts_id]
+            entries.append(
+                TimetableEntry(
+                    subjectId=subj_id,
+                    subjectName=subj.name,
+                    teacherId=subj.teacherId,
+                    teacherName=teacher.name,
+                    roomId=room_id,
+                    roomName=room.name,
+                    timeSlotId=ts_id,
+                    day=ts.day,
+                    time=ts.time,
+                    label=ts.label or f"{ts.day} {ts.time}",
+                )
+            )
         return sorted(entries, key=lambda e: (e.day, e.time))
+
+    # ── Entry Point ─────────────────────────────────────────────────────────
 
     def solve(self) -> CspResponse:
         start = time.perf_counter()
         solutions: list[list[TimetableEntry]] = []
 
-        working_domains = {k: list(v) for k, v in self.domains.items()}
-        self._backtrack({}, working_domains, solutions)
+        # Start with a copy of the initial domains and run AC-3 globally first
+        working_domains: Domains = {k: list(v) for k, v in self.initial_domains.items()}
+        feasible = self._ac3(working_domains)
+
+        if feasible:
+            self._backtrack({}, working_domains, solutions)
 
         elapsed_ms = (time.perf_counter() - start) * 1000
 
@@ -419,7 +507,8 @@ class CSPSolver:
                 timeMs=round(elapsed_ms, 2),
             ),
             message=(
-                f"Found {len(solutions)} solution(s)" if solutions
+                f"Found {len(solutions)} solution(s)"
+                if solutions
                 else "No valid schedule found. Try adding more time slots, rooms, or adjusting constraints."
             ),
         )
@@ -428,12 +517,12 @@ class CSPSolver:
 # ─── Routes ─────────────────────────────────────────────────────────────────
 
 @app.get("/csp/health")
-async def health():
+async def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
 @app.post("/csp/solve", response_model=CspResponse)
-async def solve_csp(request: CspRequest):
+async def solve_csp(request: CspRequest) -> CspResponse:
     try:
         solver = CSPSolver(
             subjects=request.subjects,
