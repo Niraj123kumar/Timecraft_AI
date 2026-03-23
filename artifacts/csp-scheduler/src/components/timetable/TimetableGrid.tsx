@@ -30,77 +30,75 @@ export const TimetableGrid = ({ solutions, currentSolutionIdx, setSolutionIdx }:
   const exportPDF = async () => {
     if (!gridRef.current) return;
     try {
-      const canvas = await html2canvas(gridRef.current, { backgroundColor: '#0A0C10', scale: 2 });
+      const canvas = await html2canvas(gridRef.current, { backgroundColor: '#0a0b0f', scale: 2 });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('l', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`schedule-solution-${currentSolutionIdx + 1}.pdf`);
+      pdf.save(`timecraft-schedule-${currentSolutionIdx + 1}.pdf`);
     } catch (err) {
       console.error("PDF generation failed", err);
     }
   };
 
   return (
-    <div className="flex flex-col h-full bg-black/20 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-md">
+    <div className="timetable-panel flex flex-col h-full">
       
       {/* Header / Controls */}
-      <div className="flex items-center justify-between p-4 border-b border-white/10 bg-white/5">
-        <h2 className="font-display font-semibold text-lg">Generated Timetable</h2>
+      <div className="timetable-panel-header flex items-center justify-between">
+        <h2 className="font-display font-semibold text-[15px] text-white/85 tracking-tight">Generated Timetable</h2>
         
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4">
           {solutions.length > 1 && (
-            <div className="flex items-center gap-3 bg-black/40 rounded-xl p-1 border border-white/5">
+            <div className="flex items-center gap-2 bg-black/40 rounded-xl p-1 border border-white/[0.06]">
               <button 
                 onClick={() => setSolutionIdx(Math.max(0, currentSolutionIdx - 1))}
                 disabled={currentSolutionIdx === 0}
-                className="p-1 rounded-lg hover:bg-white/10 disabled:opacity-30 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-white/10 disabled:opacity-30 transition-colors"
               >
-                <ChevronLeft size={18} />
+                <ChevronLeft size={16} />
               </button>
-              <span className="text-sm font-medium text-white/70">
-                Sol {currentSolutionIdx + 1} <span className="text-white/30">/ {solutions.length}</span>
+              <span className="text-xs font-semibold text-white/65 px-1 tabular-nums">
+                Sol {currentSolutionIdx + 1}<span className="text-white/25"> / {solutions.length}</span>
               </span>
               <button 
                 onClick={() => setSolutionIdx(Math.min(solutions.length - 1, currentSolutionIdx + 1))}
                 disabled={currentSolutionIdx === solutions.length - 1}
-                className="p-1 rounded-lg hover:bg-white/10 disabled:opacity-30 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-white/10 disabled:opacity-30 transition-colors"
               >
-                <ChevronRight size={18} />
+                <ChevronRight size={16} />
               </button>
             </div>
           )}
           
-          <button 
-            onClick={exportPDF}
-            className="flex items-center gap-2 px-4 py-2 bg-primary/20 text-primary border border-primary/30 rounded-xl hover:bg-primary/30 transition-colors text-sm font-medium"
-          >
-            <Download size={16} /> Export PDF
+          <button onClick={exportPDF} className="export-btn">
+            <Download size={14} /> Export PDF
           </button>
         </div>
       </div>
       
       {/* Grid */}
-      <div className="p-6 overflow-auto flex-1 custom-scrollbar">
-        <div ref={gridRef} className="min-w-[800px] p-4 rounded-xl bg-card border border-white/5 shadow-2xl">
+      <div className="p-5 overflow-auto flex-1 custom-scrollbar">
+        <div ref={gridRef} className="min-w-[800px] p-4 rounded-2xl bg-black/30 border border-white/[0.05]">
           <div 
             className="grid gap-2" 
-            style={{ gridTemplateColumns: `80px repeat(${DAYS.length}, minmax(140px, 1fr))` }}
+            style={{ gridTemplateColumns: `76px repeat(${DAYS.length}, minmax(140px, 1fr))` }}
           >
             {/* Header Row */}
-            <div className="font-medium text-white/40 text-xs uppercase tracking-wider flex items-end pb-2 justify-end pr-4">Time</div>
+            <div className="font-medium text-white/35 text-[10px] uppercase tracking-widest flex items-end pb-2 justify-end pr-3">
+              Time
+            </div>
             {DAYS.map(day => (
-              <div key={day} className="font-display font-semibold text-white/80 py-3 px-4 bg-white/5 rounded-xl border border-white/5 text-center">
+              <div key={day} className="tt-day-header">
                 {day}
               </div>
             ))}
             
-            {/* Rows */}
+            {/* Time rows */}
             {TIMES.map(time => (
               <React.Fragment key={time}>
-                <div className="font-medium text-white/40 text-xs flex justify-end pr-4 items-center">
+                <div className="font-mono text-white/35 text-[11px] flex justify-end pr-3 items-center">
                   {time}
                 </div>
                 {DAYS.map(day => {
@@ -108,8 +106,8 @@ export const TimetableGrid = ({ solutions, currentSolutionIdx, setSolutionIdx }:
                   
                   if (!entry) {
                     return (
-                      <div key={`${day}-${time}`} className="h-28 rounded-xl border border-dashed border-white/5 bg-black/20 flex items-center justify-center">
-                        <span className="text-white/10 text-xs font-medium">Free Slot</span>
+                      <div key={`${day}-${time}`} className="tt-free-slot">
+                        <span>Free</span>
                       </div>
                     );
                   }
@@ -123,18 +121,26 @@ export const TimetableGrid = ({ solutions, currentSolutionIdx, setSolutionIdx }:
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.3 }}
-                      className="h-28 rounded-xl p-3 flex flex-col justify-between border shadow-lg relative overflow-hidden group hover:scale-[1.02] transition-transform"
-                      style={{ borderColor: color, backgroundColor: bgDark }}
+                      className="h-28 rounded-xl p-3 flex flex-col justify-between border shadow-lg relative overflow-hidden group hover:scale-[1.02] hover:shadow-2xl transition-all duration-200"
+                      style={{
+                        borderColor: color,
+                        backgroundColor: bgDark,
+                        boxShadow: `0 4px 16px rgba(0,0,0,.4)`,
+                      }}
                     >
-                      <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-white to-transparent pointer-events-none" />
+                      <div className="absolute inset-0 opacity-[0.08] bg-gradient-to-br from-white to-transparent pointer-events-none" />
+                      <div
+                        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                        style={{ background: `radial-gradient(ellipse at top left, ${color}22 0%, transparent 70%)` }}
+                      />
                       <div>
-                        <h4 className="font-display font-bold leading-tight" style={{ color }}>{entry.subjectName}</h4>
-                        <p className="text-xs text-white/70 mt-1 flex items-center gap-1">
-                          <span className="w-1 h-1 rounded-full bg-white/40" />
+                        <h4 className="font-display font-bold text-sm leading-tight" style={{ color }}>{entry.subjectName}</h4>
+                        <p className="text-xs text-white/60 mt-1 flex items-center gap-1">
+                          <span className="w-1 h-1 rounded-full inline-block" style={{ backgroundColor: color, opacity: 0.6 }} />
                           {entry.teacherName}
                         </p>
                       </div>
-                      <div className="text-xs font-medium px-2 py-1 bg-black/40 rounded-md w-fit text-white/80 border border-white/10">
+                      <div className="text-[11px] font-medium px-2 py-1 bg-black/45 rounded-lg w-fit text-white/75 border border-white/[0.08] backdrop-blur-sm">
                         {entry.roomName}
                       </div>
                     </motion.div>

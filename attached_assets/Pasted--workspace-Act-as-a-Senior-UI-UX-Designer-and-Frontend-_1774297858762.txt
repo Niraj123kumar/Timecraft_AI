@@ -1,0 +1,52 @@
+@workspace Act as a Senior UI/UX Designer and Frontend Expert. I am providing a screenshot of my current app which looks too flat and boring. I need a high-end visual overhaul to make it look like a premium, futuristic AI SaaS product.
+
+GOAL:
+1. Rebrand the app to "TimeCraft AI".
+2. Transform the visual style from "Standard Dark Mode" to "Premium Glassmorphism & Neon".
+3. Maintain all functionality and layout structure strictly.
+
+⚠️ CRITICAL CONSTRAINTS:
+- DO NOT change the HTML structure (no new divs, no removing elements).
+- DO NOT change JavaScript logic or state.
+- Achieve all visual changes via CSS (classes, inline styles, or CSS modules).
+
+🎨 DESIGN SYSTEM & VIBE:
+- Theme: Deep Space / Cyberpunk Premium.
+- Background: Keep dark, but add subtle radial gradients or mesh gradients behind key sections if possible via CSS.
+- Cards/Panels: Use "Glassmorphism" (semi-transparent backgrounds with backdrop-filter: blur).
+- Borders: Add subtle 1px borders with low opacity white (rgba(255,255,255,0.1)) to define edges.
+- Accents: Use a primary gradient of Violet (#7c3aed) to Pink (#ec4899) to Blue (#3b82f6).
+
+🛠 SPECIFIC TASKS:
+
+1. HEADER BRANDING (Top Left):
+   - Change Title Text: "AI CSP Scheduler" → "TimeCraft AI"
+   - Change Subtitle Text: "Constraint Satisfaction Solver Engine" → "Smart AI-Powered Scheduling Engine"
+   - Title Style: Font-size 32px+, Font-weight 800. Apply the Violet→Pink→Blue gradient text effect (-webkit-background-clip: text). Add a subtle glow on hover.
+   - Subtitle Style: Small, uppercase, tracking-wide, gray-400 color.
+
+2. DASHBOARD CARDS (Solver Config, Stats, Timetable):
+   - Background: Change solid dark backgrounds to rgba(30, 30, 40, 0.6) with backdrop-filter: blur(10px).
+   - Borders: Add a 1px solid border with rgba(255, 255, 255, 0.08).
+   - Shadows: Add a soft, colored box-shadow on hover (e.g., purple glow) to make them feel interactive.
+   - Radius: Ensure border-radius is consistent and smooth (e.g., 12px or 16px).
+
+3. STATS PANELS (Top Row: Assignments, Backtracks, etc.):
+   - Make the numbers (444, 12, 4140) pop. Increase font size and weight.
+   - Add a subtle gradient icon background or glow behind the icons.
+   - Label text should be uppercase and slightly muted (gray-400).
+
+4. BUTTONS ("Generate Schedule", "Export PDF"):
+   - Primary Button ("Generate Schedule"): Apply the main gradient background (Violet→Pink). Add a subtle white shadow/glow. On hover, brighten the gradient and lift the button (transform: translateY(-2px)).
+   - Secondary Buttons: Use a transparent background with a border and a hover fill effect.
+
+5. TIMETABLE GRID:
+   - Ensure the grid lines are subtle (rgba(255,255,255,0.05)).
+   - Class Cards (e.g., "Calculus I"): Give them a distinct background color (maybe a deep orange/brown gradient as seen in screenshot, but polished with a border and shadow).
+   - Free Slots: Make them very subtle/dim so they don't distract.
+
+6. INPUT FIELDS (Teacher, Subject):
+   - Style inputs to match the glassmorphism theme (dark transparent bg, light border, focus ring with primary gradient color).
+
+EXECUTION:
+Scan the CSS and Component files. Apply these styles globally where possible to ensure consistency. The result should feel expensive, modern, and high-tech.

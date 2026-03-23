@@ -56,12 +56,12 @@ export default function Dashboard() {
         {/* ── Header ── */}
         <header className="flex items-center justify-between px-6 py-4 shrink-0 border-b border-white/6 backdrop-blur-sm bg-black/10">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary via-primary/80 to-accent flex items-center justify-center shadow-lg shadow-primary/25">
-              <Sparkles className="text-white" size={17} />
+            <div className="brand-icon">
+              <Sparkles className="text-white" size={16} />
             </div>
             <div>
-              <h1 className="text-lg font-display font-bold text-white leading-tight">AI CSP Scheduler</h1>
-              <p className="text-xs text-white/40 font-medium leading-tight">Constraint Satisfaction Solver Engine</p>
+              <h1 className="brand-title font-display leading-tight">TimeCraft AI</h1>
+              <p className="brand-subtitle">Smart AI-Powered Scheduling Engine</p>
             </div>
           </div>
 

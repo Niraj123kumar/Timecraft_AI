@@ -7,16 +7,17 @@ interface StatCardProps {
   value: string | number;
   color: string;
   bg: string;
+  glowColor: string;
 }
 
-const StatCard = ({ icon: Icon, label, value, color, bg }: StatCardProps) => (
-  <div className="glass-panel p-4 rounded-2xl flex items-center gap-4">
-    <div className={`p-3 rounded-xl ${bg} ${color}`}>
-      <Icon size={20} />
+const StatCard = ({ icon: Icon, label, value, color, bg, glowColor }: StatCardProps) => (
+  <div className="stat-card">
+    <div className={`stat-icon-wrap ${bg}`} style={{ boxShadow: `0 0 16px ${glowColor}` }}>
+      <Icon size={20} className={color} />
     </div>
     <div>
-      <p className="text-xs font-medium text-white/50 uppercase tracking-wider">{label}</p>
-      <p className="text-xl font-display font-bold text-white mt-0.5">{value}</p>
+      <p className="stat-label">{label}</p>
+      <p className="stat-value">{value}</p>
     </div>
   </div>
 );
@@ -29,28 +30,32 @@ export const StatsBar = ({ stats }: { stats: SolverStats }) => {
         label="Assignments"
         value={stats.assignments}
         color="text-success"
-        bg="bg-success/10"
+        bg="bg-success/15"
+        glowColor="rgba(34,197,94,.25)"
       />
       <StatCard
         icon={RotateCcw}
         label="Backtracks"
         value={stats.backtracks}
         color="text-destructive"
-        bg="bg-destructive/10"
+        bg="bg-destructive/15"
+        glowColor="rgba(239,68,68,.25)"
       />
       <StatCard
         icon={Zap}
         label="Propagations"
         value={stats.propagations}
         color="text-secondary"
-        bg="bg-secondary/10"
+        bg="bg-secondary/15"
+        glowColor="rgba(34,211,238,.25)"
       />
       <StatCard
         icon={Clock}
         label="Solve Time"
         value={`${stats.timeMs.toFixed(1)} ms`}
         color="text-accent"
-        bg="bg-accent/10"
+        bg="bg-accent/15"
+        glowColor="rgba(236,72,153,.25)"
       />
     </div>
   );
