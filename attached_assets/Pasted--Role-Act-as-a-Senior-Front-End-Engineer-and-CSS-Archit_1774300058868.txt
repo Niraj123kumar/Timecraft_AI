@@ -1,0 +1,54 @@
+# Role
+Act as a Senior Front-End Engineer and CSS Architect.
+
+# Task
+Implement the "TimeCraft AI" visual overhaul. The goal is a high-fidelity, deep-space aesthetic using a robust design token system. All changes must be CSS-only (no structural DOM changes) unless strictly necessary for accessibility.
+
+# Visual Specifications
+1. **Typography:** 
+   - Title: "TimeCraft AI" (36px, weight 800). 
+   - Effect: Violet→Pink→Blue gradient text with continuous shifting animation + subtle neon flicker. 
+   - Hover: Double drop-shadow glow.
+2. **Background:** 
+   - Three layered radial mesh gradients (Purple top-left, Blue top-right, Pink bottom-center). 
+   - Fixed to viewport (`background-attachment: fixed` or `position: fixed` pseudo-element) for deep space feel.
+3. **Scrollbars:** 
+   - Violet→Pink gradient thumb. 
+   - Hover state: Snaps to solid pink. 
+   - Apply to sidebar and main panel.
+4. **Stat Cards:** 
+   - Numbers: 32px, weight 800, animated three-color gradient. 
+   - Card: Gradient bottom-border stripe (fades in on hover) + glass sheen inset highlight.
+5. **Form & Subject Cards:** 
+   - Top accent line (Transparent→Purple→Transparent). 
+   - Hover: Lift effect + colored outer glow ring. 
+   - Warning Variant: Use red gradient line.
+6. **Inputs/Selects:** 
+   - Min-height 44px, dark transparent background. 
+   - Focus: Animated border-dance (cycles Purple→Pink→Blue).
+7. **Generate Button:** 
+   - Gradient background (from tokens). 
+   - Hover: Shimmer sweep. 
+   - Rest: Pulse-glow animation.
+
+# Technical Constraints & Best Practices (CRITICAL)
+1. **Design Tokens:** 
+   - Define 30+ CSS custom properties (`:root`) for colors, spacing, radius, transitions, and glow values. 
+   - Ensure tokens are scoped for potential future Light Mode support.
+2. **Accessibility (WCAG):** 
+   - **Motion:** Wrap all animations (flicker, shift, border-dance) in `@media (prefers-reduced-motion: reduce)` to disable them for sensitive users.
+   - **Contrast:** Ensure gradient text meets WCAG AA contrast ratios against the background. Add subtle text-shadows if needed.
+   - **Focus:** Ensure focus states are visible and distinct (min 2px width), not obscured by animations.
+   - **Photosensitivity:** Ensure "flicker" frequency is safe (<3 flashes per second).
+3. **Performance:** 
+   - Use `will-change: transform` sparingly on animated elements. 
+   - Prefer animating `transform` and `opacity` over `background-position` where possible to avoid layout thrashing.
+   - Ensure fixed backgrounds do not cause scroll jank on mobile.
+4. **Browser Compatibility:** 
+   - Style native `<select>` dropdowns carefully; ensure options remain readable on iOS Safari (avoid white-on-white).
+
+# Output Format
+1. Provide the complete `variables.css` (Design Tokens).
+2. Provide the updated `global.css` and component styles.
+3. Include a brief note on any HTML changes required for accessibility (e.g., aria-labels).
+4. Generate a conventional commit message based on these changes.

@@ -661,4 +661,126 @@
     border-radius: 99px;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #ec4899; }
+
+  /* ══════════════════════════════════════════
+     PERFORMANCE — will-change (used sparingly)
+     Only on elements that animate transform on hover.
+  ══════════════════════════════════════════ */
+  .stat-card,
+  .form-card,
+  .button-glow,
+  .export-btn,
+  .add-btn,
+  .icon-btn {
+    will-change: transform;
+  }
+
+  /* ══════════════════════════════════════════
+     ACCESSIBILITY — FOCUS RING
+     Visible 2 px outline that persists regardless of
+     animation state; never hidden by border-dance.
+  ══════════════════════════════════════════ */
+  :focus-visible {
+    outline: 2px solid rgba(124, 58, 237, 0.90);
+    outline-offset: 2px;
+    border-radius: var(--r-sm);
+  }
+  /* Inputs already show the 3px box-shadow ring;
+     keep outline: none only when the ring is present. */
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid rgba(124, 58, 237, 0.80);
+    outline-offset: 0px;
+  }
+  /* Buttons: larger target, stronger contrast */
+  button:focus-visible {
+    outline: 2px solid rgba(167, 139, 250, 0.95);
+    outline-offset: 3px;
+  }
+
+  /* ══════════════════════════════════════════
+     ACCESSIBILITY — iOS SAFARI SELECT FIX
+     Prevents white-on-white option text on iOS.
+  ══════════════════════════════════════════ */
+  @supports (-webkit-touch-callout: none) {
+    select option {
+      background-color: #1a1a2e !important;
+      color: #f8f8ff !important;
+    }
+  }
+}
+
+/* ══════════════════════════════════════════
+   ACCESSIBILITY — REDUCED MOTION
+   Wraps every keyframe animation and transition
+   that could cause issues for vestibular / epilepsy
+   sensitive users. Safe static fallbacks applied.
+══════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  /* Disable all keyframe animations globally */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* Brand title — freeze gradient, remove flicker */
+  .brand-title {
+    animation: none;
+    background-position: 0% 50%;
+    filter: none;
+  }
+  .brand-title:hover { filter: none; }
+
+  /* Brand icon — remove pulsing glow */
+  .brand-icon { animation: none; box-shadow: none; }
+
+  /* Stat values — freeze gradient shift */
+  .stat-value { animation: none; background-position: 0% 50%; }
+
+  /* Generate button — no pulse, no shimmer sweep */
+  .button-glow { animation: none; }
+  .button-glow::before { display: none; }
+  .button-glow:hover { transform: none; }
+
+  /* Cards — no lift on hover */
+  .form-card:hover   { transform: none; }
+  .stat-card:hover   { transform: none; }
+  .export-btn:hover  { transform: none; }
+  .add-btn:hover     { transform: none; }
+  .icon-btn:hover    { transform: none; }
+
+  /* Entry animation — instant appearance */
+  .fade-in { animation: none; opacity: 1; transform: none; }
+
+  /* Input focus — no border-dance animation */
+  input:focus,
+  select:focus,
+  textarea:focus,
+  .glass-input:focus { animation: none; }
+
+  /* Keep focus ring visible even without animation */
+  :focus-visible {
+    outline: 2px solid rgba(124, 58, 237, 0.90);
+    outline-offset: 2px;
+  }
+
+  /* Scrollbar — static purple thumb (no gradient anim) */
+  ::-webkit-scrollbar-thumb { background: #7c3aed; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: #7c3aed; }
+
+  /* Timetable cells — no scale on hover */
+  .hover\:scale-\[1\.02\]:hover { transform: none !important; }
+
+  /* will-change: restore to auto so there's no GPU layer cost */
+  .stat-card,
+  .form-card,
+  .button-glow,
+  .export-btn,
+  .add-btn,
+  .icon-btn { will-change: auto; }
 }
