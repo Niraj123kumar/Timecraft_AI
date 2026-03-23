@@ -1,0 +1,137 @@
+Build a full-stack web application called **“AI Constraint Solver for Real Life (CSP App)”** that solves real-world scheduling problems using Constraint Satisfaction Problem (CSP) techniques.
+
+---
+
+## 🎯 Objective
+
+The application should generate valid schedules (e.g., college timetable) by satisfying multiple constraints using AI techniques.
+
+---
+
+## 🧠 Core AI Concepts (must implement)
+
+* Model the problem as a CSP:
+
+  * Variables (e.g., subjects/classes)
+  * Domains (time slots)
+  * Constraints (no overlap, teacher availability, room constraints)
+
+* Implement:
+
+  1. Backtracking Search
+  2. Forward Checking
+  3. Constraint Propagation
+  4. Heuristics:
+
+     * Minimum Remaining Values (MRV)
+     * Degree Heuristic
+
+---
+
+## 🏗️ Tech Stack
+
+### Frontend:
+
+* React.js
+* Tailwind CSS
+* Clean dashboard UI
+* Forms to input:
+
+  * Subjects
+  * Teachers
+  * Rooms
+  * Time slots
+
+### Backend:
+
+* Python (FastAPI or Flask)
+* CSP solver implemented in Python
+
+---
+
+## ⚙️ Functional Requirements
+
+1. User inputs:
+
+   * List of subjects
+   * Teacher assignments
+   * Available time slots
+   * Room details
+
+2. System builds CSP model:
+
+   * Assign variables, domains, constraints
+
+3. Apply CSP algorithms:
+
+   * Backtracking with forward checking
+
+4. Output:
+
+   * Valid timetable (grid format)
+
+---
+
+## 🎨 UI Requirements
+
+* Modern, clean interface
+* Table/grid display of timetable
+* Highlight conflicts (if any)
+* Button: “Generate Schedule”
+* Loading animation
+
+---
+
+## 🔥 Advanced Features
+
+* Multiple solution generation
+* Show step-by-step solving process
+* Visualize constraint propagation
+* Export timetable as PDF
+
+---
+
+## 📊 Output
+
+* Timetable grid:
+  Day vs Time slots
+* Example:
+  Monday:
+  9AM - Math
+  10AM - Physics
+
+---
+
+## 🧪 Testing
+
+* Handle unsatisfiable constraints
+* Show error: “No valid schedule found”
+
+---
+
+## 🏁 Deliverables
+
+* Full working app (frontend + backend)
+* Clean code structure
+* README with setup instructions
+
+---
+
+## 💡 Bonus
+
+* Drag-and-drop timetable editor
+* Save schedules
+* Multi-user support
+
+---
+
+## ⚠️ Important
+
+* Code must be modular and well-commented
+* Focus on correctness of CSP solving
+* UI should be visually appealing for presentation
+
+---
+
+Build the system step-by-step and ensure it is demo-ready.
+make it best with great user interface
