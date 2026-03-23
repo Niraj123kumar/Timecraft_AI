@@ -1,0 +1,5 @@
+[run]
+cmd = "CSP_PORT=8001 python3 main.py"
+
+[deployment]
+startup = { waitForPort = 8001 }

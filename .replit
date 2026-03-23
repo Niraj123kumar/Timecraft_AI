@@ -1,89 +1,18 @@
-modules = ["nodejs-24", "python-3.11"]
+[run]
+cmd = "true"
 
-[[artifacts]]
-id = "artifacts/api-server"
+[[ports]]
+localPort = 8001
+externalPort = 80
 
-[[artifacts]]
-id = "artifacts/mockup-sandbox"
+[[ports]]
+localPort = 8080
+externalPort = 8080
 
-[[artifacts]]
-id = "artifacts/csp-scheduler"
+[[ports]]
+localPort = 8081
+externalPort = 8081
 
-[deployment]
-router = "application"
-deploymentTarget = "autoscale"
-
-[deployment.postBuild]
-args = ["pnpm", "store", "prune"]
-env = { "CI" = "true" }
-
-[workflows]
-runButton = "Project"
-
-[[workflows.workflow]]
-name = "Project"
-mode = "parallel"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "API Server"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "CSP Solver (Python)"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Frontend"
-
-# ─── API SERVER (Node.js) ───
-[[workflows.workflow]]
-name = "API Server"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd artifacts/api-server && pnpm run dev"
-waitForPort = 8080
-
-[workflows.workflow.metadata]
-outputType = "console"
-
-# ─── CSP SOLVER (Python) ───
-[[workflows.workflow]]
-name = "CSP Solver (Python)"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "CSP_PORT=8001 python3 artifacts/csp-solver/main.py"
-waitForPort = 8001
-
-[workflows.workflow.metadata]
-outputType = "console"
-
-# ─── FRONTEND (React) ───
-[[workflows.workflow]]
-name = "Frontend"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd artifacts/csp-scheduler && pnpm start"
-waitForPort = 5173
-
-[workflows.workflow.metadata]
-outputType = "console"
-
-[agent]
-stack = "PNPM_WORKSPACE"
-expertMode = true
-
-[postMerge]
-path = "scripts/post-merge.sh"
-timeoutMs = 20000
-
-[nix]
-channel = "stable-25_05"
-packages = ["libxcrypt", "nano"]
+[[ports]]
+localPort = 19942
+externalPort = 3000
