@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Settings2, AlertTriangle, RefreshCcw, ChevronDown } from "lucide-react";
 import { useSchedulerStore } from "@/store/use-scheduler";
-import { useSolveCsp } from "@workspace/api-client-react";
+import { useInBrowserSolver } from "@/lib/use-in-browser-solver";
 import { TeachersForm, RoomsForm, SubjectsForm, TimeSlotsForm } from "@/components/forms/EntityForms";
 import { TimetableGrid } from "@/components/timetable/TimetableGrid";
 import { SolvingTrace } from "@/components/timetable/SolvingTrace";
@@ -10,7 +10,7 @@ import { StatsBar } from "@/components/timetable/StatsBar";
 
 export default function Dashboard() {
   const store = useSchedulerStore();
-  const { mutate, isPending, data, isError, error, reset } = useSolveCsp();
+  const { mutate, isPending, data, isError, error, reset } = useInBrowserSolver();
 
   const [solutionIdx, setSolutionIdx] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
