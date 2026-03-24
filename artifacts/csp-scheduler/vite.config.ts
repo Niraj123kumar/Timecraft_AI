@@ -7,7 +7,7 @@ import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 // PORT and BASE_PATH are injected at runtime by the Replit artifact system.
 // During production builds (CI/pnpm build) they may be absent — use safe defaults.
 const port = Number(process.env.PORT) || 19942;
-const basePath = process.env.BASE_PATH || "/";
+const basePath = process.env.BASE_PATH || "/Timecraft_AI/";
 
 export default defineConfig({
   base: basePath,
