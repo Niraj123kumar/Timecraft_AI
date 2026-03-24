@@ -75,10 +75,10 @@ export default function Dashboard() {
         </header>
 
         {/* ── Main layout: sidebar + content ── */}
-        <div className="flex flex-1 min-h-0 overflow-hidden">
+        <div className="flex flex-col md:flex-row flex-1 min-h-0 overflow-y-auto md:overflow-hidden">
 
           {/* ── LEFT SIDEBAR ── */}
-          <aside className="w-[420px] shrink-0 flex flex-col border-r border-white/6 bg-black/10 backdrop-blur-sm">
+          <aside className="w-full md:w-[420px] shrink-0 flex flex-col border-b md:border-b-0 md:border-r border-white/6 bg-black/10 backdrop-blur-sm max-h-[45dvh] md:max-h-none">
 
             {/* Solver Config card */}
             <div className="px-5 pt-5 shrink-0">

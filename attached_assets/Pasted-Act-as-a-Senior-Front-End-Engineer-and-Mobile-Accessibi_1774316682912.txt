@@ -1,0 +1,135 @@
+Act as a Senior Front-End Engineer and Mobile Accessibility Specialist.
+
+CONTEXT
+I have a web app called TimeCraft AI hosted on Replit. The app loads on mobile now, but the generated timetable grid is not visible/usable on mobile (iOS Safari and Android Chrome).
+
+Desktop works correctly.
+
+On mobile:
+
+Inputs like Subjects, Teachers, Rooms, and Time Slots are visible
+After clicking Generate Schedule, the timetable section does not properly appear
+It may be off-screen, clipped, collapsed, hidden, or wider than the viewport with no horizontal scrolling
+TASK
+Diagnose and fix the mobile timetable visibility issue only.
+
+REQUIRED FIXES
+Apply these fixes to the existing codebase without rewriting the app.
+
+1) Make timetable horizontally scrollable on mobile
+Add/merge:
+
+CSS
+
+.timetable-container,
+.schedule-grid,
+.generated-timetable {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+}
+2) Prevent timetable collapse on narrow screens
+Add/merge:
+
+CSS
+
+.timetable-table,
+.schedule-table {
+  min-width: 600px;
+  width: max-content;
+}
+3) Make stats/metrics wrap on mobile
+Add/merge:
+
+CSS
+
+.stats-row,
+.metrics-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stats-row > *,
+.metrics-row > * {
+  flex: 1 1 calc(50% - 8px);
+  min-width: 140px;
+}
+4) Improve timetable readability on small screens
+Add:
+
+CSS
+
+@media (max-width: 768px) {
+  .timetable-cell,
+  .schedule-cell {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .day-header {
+    font-size: 11px;
+    padding: 6px 4px;
+  }
+
+  .time-label {
+    font-size: 10px;
+    min-width: 40px;
+  }
+}
+5) Ensure the results/timetable section is not hidden on mobile
+Inspect the actual code and fix any mobile-specific issue where the generated output section is blocked by:
+
+display: none
+visibility: hidden
+opacity: 0
+overflow: hidden
+fixed heights
+conditional render logic that fails on mobile
+Only change what is necessary to ensure the timetable becomes visible after schedule generation.
+
+6) Inspect parent containers for clipping
+Check all parent wrappers around the timetable/results section. If any parent container is clipping content on mobile due to:
+
+overflow: hidden
+fixed height
+max-height
+transform/layout side effects
+adjust only those containers necessary so the timetable can render fully on mobile.
+
+7) Add mobile scroll hint
+Add:
+
+CSS
+
+@media (max-width: 768px) {
+  .timetable-container::after {
+    content: '← scroll →';
+    display: block;
+    text-align: center;
+    font-size: 11px;
+    color: #888;
+    padding: 4px 0;
+  }
+}
+DO NOT CHANGE
+CSP solver logic
+Generate Schedule functionality
+Desktop layout
+Existing colors, gradients, glow effects, animations
+Design tokens / CSS variables
+Existing accessibility improvements unless required for this fix
+IMPORTANT
+Do not rewrite the app
+Do not rename unrelated classes
+Do not replace the timetable with a different component
+Only make the minimum changes needed to fix mobile timetable rendering
+DELIVERABLES
+Updated HTML/CSS/JS with the mobile timetable fixes applied
+Brief diagnosis of what was causing the timetable not to appear on mobile
+Confirmation that:
+timetable is visible on mobile
+horizontal scrolling works
+stats wrap correctly
+desktop layout remains unchanged

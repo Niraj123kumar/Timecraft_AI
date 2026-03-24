@@ -236,14 +236,6 @@
     padding-right: 36px;
   }
   select option { background: #1a1a2e; color: var(--text-primary); padding: 8px; }
-
-  @supports (-webkit-touch-callout: none) {
-    select,
-    select option {
-      background: #000;
-      color: #fff;
-    }
-  }
 }
 
 /* ═══════════════════════════════════════════
@@ -717,6 +709,61 @@
     select option {
       background-color: #1a1a2e !important;
       color: #f8f8ff !important;
+    }
+  }
+
+  /* ══════════════════════════════════════════
+     MOBILE — TIMETABLE HORIZONTAL SCROLL
+  ══════════════════════════════════════════ */
+  .timetable-container {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .timetable-table {
+    min-width: 600px;
+    width: max-content;
+  }
+
+  .stats-row,
+  .metrics-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .stats-row > *,
+  .metrics-row > * {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 140px;
+  }
+
+  @media (max-width: 768px) {
+    .timetable-cell,
+    .schedule-cell {
+      padding: 8px;
+      font-size: 12px;
+    }
+
+    .tt-day-header {
+      font-size: 10px;
+      padding: 6px 4px;
+    }
+
+    .time-label {
+      font-size: 10px;
+      min-width: 40px;
+    }
+
+    .timetable-container::after {
+      content: '\2190 scroll \2192';
+      display: block;
+      text-align: center;
+      font-size: 11px;
+      color: #888;
+      padding: 4px 0;
     }
   }
 }

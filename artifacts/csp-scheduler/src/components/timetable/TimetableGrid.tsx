@@ -79,8 +79,8 @@ export const TimetableGrid = ({ solutions, currentSolutionIdx, setSolutionIdx }:
       </div>
       
       {/* Grid */}
-      <div className="p-5 overflow-auto flex-1 custom-scrollbar">
-        <div ref={gridRef} className="min-w-[800px] p-4 rounded-2xl bg-black/30 border border-white/[0.05]">
+      <div className="timetable-container p-5 overflow-auto flex-1 custom-scrollbar">
+        <div ref={gridRef} className="timetable-table p-4 rounded-2xl bg-black/30 border border-white/[0.05]">
           <div 
             className="grid gap-2" 
             style={{ gridTemplateColumns: `76px repeat(${DAYS.length}, minmax(140px, 1fr))` }}
