@@ -27,3 +27,6 @@ externalPort = 3000
 
 [nix]
 packages = ["zip"]
+
+[agent]
+expertMode = true
