@@ -1,13 +1,13 @@
-[run]
-cmd = "true"
+language = "html"
+modules = ["nodejs-20"]
 
-[[ports]]
-localPort = 8001
-externalPort = 80
+[deployment]
+deploymentTarget = "static"
+publicDir = "HTML"
 
 [[ports]]
 localPort = 8080
-externalPort = 8080
+externalPort = 80
 
 [[ports]]
 localPort = 8081
