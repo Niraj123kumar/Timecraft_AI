@@ -7,6 +7,14 @@ import type {
   TimetableEntry,
   SolvingStep,
 } from "@workspace/api-client-react";
+function shuffle<T>(array: T[]): T[] {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 
 type Variable = readonly [string, number];
 type Value = readonly [string, string];
@@ -93,12 +101,14 @@ export function solveCsp(input: CspInput): CspResponse {
         : new Set(timeSlotsMap.keys());
 
     const domain: Value[] = [];
-    for (const tsId of allowedSlotIds) {
-      for (const r of rooms) {
-        domain.push([tsId, r.id] as const);
-      }
-    }
-    initialDomains.set(varKey(v), domain);
+const shuffledSlots = shuffle([...allowedSlotIds]);
+
+for (const tsId of shuffledSlots) {
+  for (const r of rooms) {
+    domain.push([tsId, r.id] as const);
+  }
+}
+    initialDomains.set(varKey(v), shuffle(domain));
   }
 
   function addStep(
