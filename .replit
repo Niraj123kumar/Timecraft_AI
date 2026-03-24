@@ -1,5 +1,5 @@
 language = "html"
-modules = ["nodejs-20"]
+modules = ["nodejs-20", "python-3.11"]
 
 [deployment]
 deploymentTarget = "static"
