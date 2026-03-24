@@ -1,0 +1,19 @@
+packages:
+  "framer-motion": "For fluid, premium animations and micro-interactions"
+  "zustand": "For managing the complex global state of the scheduler inputs"
+  "uuid": "For generating unique IDs for entities"
+  "@types/uuid": "Types for uuid"
+  "html2canvas": "For capturing the timetable grid for PDF export"
+  "jspdf": "For generating PDF documents from the timetable"
+  "clsx": "For conditional class merging"
+  "tailwind-merge": "For merging tailwind classes safely"
+  "lucide-react": "For beautiful, consistent iconography"
+
+images:
+  - path: "artifacts/csp-scheduler/public/images/hero-bg.png"
+    description: "Dark, moody, professional background. Deep navy blue and obsidian colors with very subtle abstract geometric mesh gradients hinting at mathematics, networks, and scheduling. High-end, academic tech vibe."
+    aspect_ratio: "16:9"
+
+notes:
+  - API endpoints will proxy to the python backend via the main express API server
+  - The API schema expects arrays with at least 1 item for subjects, teachers, rooms, timeSlots

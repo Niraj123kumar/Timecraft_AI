@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "CSP Scheduler"
+version = "1.0.0"
+id = "artifacts/csp-scheduler"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19942
+
+[services.development]
+run = "pnpm --filter @workspace/csp-scheduler run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/csp-scheduler", "run", "build" ]
+publicDir = "artifacts/csp-scheduler/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19942"
+BASE_PATH = "/"
