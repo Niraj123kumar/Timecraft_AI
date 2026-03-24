@@ -42,7 +42,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden selection:bg-primary/30">
+    <div className="min-h-dvh bg-background relative overflow-hidden selection:bg-primary/30">
       {/* Ambient background */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-25%] left-[-15%] w-[55%] h-[55%] bg-primary/15 blur-[180px] rounded-full" />
@@ -51,7 +51,7 @@ export default function Dashboard() {
       </div>
 
       {/* App shell */}
-      <div className="relative z-10 flex flex-col h-screen max-w-screen-2xl mx-auto">
+      <div className="relative z-10 flex flex-col h-dvh max-w-screen-2xl mx-auto">
 
         {/* ── Header ── */}
         <header className="flex items-center justify-between px-6 py-4 shrink-0 border-b border-white/6 backdrop-blur-sm bg-black/10">

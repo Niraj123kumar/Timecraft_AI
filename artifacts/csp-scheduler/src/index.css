@@ -171,8 +171,10 @@
     color: var(--text-primary);
     font-family: var(--font-sans);
     line-height: 1.6;
-    min-height: 100vh;
+    min-height: 100dvh;
     overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     @apply antialiased selection:bg-primary/30;
   }
 
@@ -204,7 +206,7 @@
     border: 1px solid var(--border-default);
     border-radius: var(--r-sm);
     color: var(--text-primary);
-    font-size: 14px;
+    font-size: 16px;
     font-family: inherit;
     line-height: 1.5;
     outline: none;
@@ -234,6 +236,14 @@
     padding-right: 36px;
   }
   select option { background: #1a1a2e; color: var(--text-primary); padding: 8px; }
+
+  @supports (-webkit-touch-callout: none) {
+    select,
+    select option {
+      background: #000;
+      color: #fff;
+    }
+  }
 }
 
 /* ═══════════════════════════════════════════

@@ -1,0 +1,75 @@
+Act as a Senior Front-End Engineer and Mobile Accessibility Specialist.
+
+CONTEXT:
+I have a web app called "TimeCraft AI" hosted on Replit at https://timecraft-ai.replit.app/. It works perfectly on desktop Chrome but shows a white/blank screen on mobile (iOS Safari and Android Chrome).
+
+DIAGNOSE AND FIX the following issues using the exact code provided:
+
+1. ADD these missing meta tags inside <head> if not already present:
+
+HTML
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+2. FIX viewport height (iOS address bar bug):
+Replace every instance of 100vh / min-height: 100vh with modern dvh:
+
+CSS
+
+height: 100dvh;
+min-height: 100dvh;
+3. FIX body CSS — add these mobile safe-area fixes to the body/main container:
+
+CSS
+
+body {
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+4. FIX iOS input zoom & Touch Targets (WCAG 2.5.5):
+Ensure all inputs, selects, textareas have:
+
+CSS
+
+input, select, textarea {
+  font-size: 16px !important;
+  min-height: 44px;
+  min-width: 44px;
+}
+5. FIX iOS select elements:
+
+CSS
+
+@supports (-webkit-touch-callout: none) {
+  select, option {
+    background: #000;
+    color: #fff;
+  }
+}
+6. ADD global error catching at the very top of the main JS file to catch the white screen:
+
+JavaScript
+
+console.log('TimeCraft AI Loaded ✓');
+window.addEventListener('error', function(e) {
+  document.body.innerHTML = `<div style="color:red;padding:20px;font-size:16px;font-family:monospace;z-index:9999;position:relative;">
+    ERROR: ${e.message}<br>
+    File: ${e.filename}<br>
+    Line: ${e.lineno}
+  </div>`;
+});
+7. PRESERVE everything below — DO NOT TOUCH OR BREAK:
+
+All CSS custom properties and design tokens
+All gradient, glow, and animation effects
+@media (prefers-reduced-motion: reduce) blocks
+All :focus-visible outline styles
+will-change: transform on existing interactive selectors
+All existing JS logic and functionality
+DELIVERABLES:
+
+Updated index.html, style.css, and script.js with the fixes integrated.
+Brief note on what JS error might have been causing the white screen.
+CRITICAL: DO NOT rewrite the app. Only inject the mobile fixes listed above into my attached code.
