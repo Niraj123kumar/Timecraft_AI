@@ -34,7 +34,7 @@ export const TimetableGrid = ({ solutions, currentSolutionIdx, setSolutionIdx }:
 
   const usedDays = Array.from(new Set(currentSolution.map(e => e.day)))
     .sort((a, b) => ALL_DAYS.indexOf(a) - ALL_DAYS.indexOf(b));
-  const DAYS = usedDays.length > 0 ? usedDays : ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+  const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday"];
 
   const usedTimes = Array.from(new Set(currentSolution.map(e => e.time))).sort();
   const TIMES = usedTimes.length > 0 ? usedTimes : ["09:00", "10:00", "11:00"];
