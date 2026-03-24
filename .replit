@@ -3,7 +3,7 @@ modules = ["nodejs-20"]
 
 [deployment]
 deploymentTarget = "static"
-publicDir = "HTML"
+publicDir = "/home/runner/workspace/HTML"
 
 [[ports]]
 localPort = 8080
