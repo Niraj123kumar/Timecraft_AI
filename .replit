@@ -26,7 +26,7 @@ localPort = 19942
 externalPort = 3000
 
 [nix]
-packages = ["zip", "nano"]
+packages = ["zip", "nano", "vite"]
 
 [agent]
 expertMode = true
