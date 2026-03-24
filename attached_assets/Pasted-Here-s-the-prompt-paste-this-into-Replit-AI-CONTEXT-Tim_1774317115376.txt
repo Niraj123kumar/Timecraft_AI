@@ -1,0 +1,124 @@
+Here's the prompt — paste this into Replit AI:
+
+---
+
+**CONTEXT:**
+TimeCraft AI at `https://timecraft-ai.replit.app/` was recently fixed for mobile timetable visibility. Two issues were NOT addressed in that fix and need to be resolved now.
+
+---
+
+**ISSUE 1 — Scroll Hint showing even when not needed**
+
+The `← scroll →` pseudo-element currently shows permanently on mobile even when the timetable content fits the screen without scrolling. Fix it with a JS ResizeObserver so it only appears when the table actually overflows:
+
+```javascript
+const container = document.querySelector('.timetable-container');
+if (container) {
+  const observer = new ResizeObserver(() => {
+    const needsScroll = container.scrollWidth > container.clientWidth;
+    container.classList.toggle('show-scroll-hint', needsScroll);
+  });
+  observer.observe(container);
+}
+```
+
+Update the CSS to only show the hint when the class is present:
+```css
+.timetable-container.show-scroll-hint::after {
+  content: '← scroll →';
+  display: block;
+  text-align: center;
+  font-size: 11px;
+  color: #888;
+  padding: 4px 0;
+}
+```
+Remove the old always-visible `::after` rule entirely.
+
+---
+
+**ISSUE 2 — Sidebar too tall on small phones (iPhone SE, small Android)**
+
+The current `max-h-[45dvh]` sidebar on mobile leaves very little room for the timetable on short-screen devices. Add a minimum height guard on the timetable panel so it always has enough space:
+
+```css
+@media (max-width: 768px) {
+  .timetable-panel, .main-panel {
+    min-height: 300px;
+    flex: 1;
+  }
+  .sidebar {
+    max-height: min(45dvh, calc(100dvh - 320px));
+  }
+}
+```
+This ensures sidebar never pushes timetable below 300px visible height on any device.
+
+---
+
+**ISSUE 3 — Export PDF button broken on mobile**
+
+The Export PDF button likely uses fixed-width rendering assumptions that break on mobile viewports. Fix it by forcing the PDF export to always render at desktop width regardless of current viewport:
+
+```javascript
+function exportPDF() {
+  const timetable = document.querySelector('.timetable-table, .schedule-table');
+  if (!timetable) return;
+
+  const originalStyle = timetable.style.cssText;
+  timetable.style.minWidth = '800px';
+  timetable.style.width = '800px';
+
+  window.print();
+
+  setTimeout(() => {
+    timetable.style.cssText = originalStyle;
+  }, 1000);
+}
+```
+
+Also add this print-specific CSS so the timetable always prints fully:
+```css
+@media print {
+  .timetable-container {
+    overflow: visible !important;
+    width: 100% !important;
+  }
+  .timetable-table {
+    min-width: 800px !important;
+    width: 100% !important;
+  }
+  .sidebar {
+    display: none !important;
+  }
+}
+```
+
+---
+
+**ISSUE 4 — Desktop regression check**
+
+After applying all above fixes, verify the desktop layout is unchanged by confirming:
+- `flex-col md:flex-row` still applies `flex-row` at `md` breakpoint and above
+- Sidebar width on desktop is still `w-[420px]`
+- Timetable grid on desktop still spans full remaining width
+- Export PDF still works on desktop Chrome
+
+---
+
+**DO NOT change:**
+- Any existing colors, gradients, animations
+- The CSP solver logic
+- The Generate Schedule functionality
+- Any fixes already applied in the previous mobile session
+- Any Tailwind classes not mentioned above
+
+**DELIVERABLES:**
+1. Updated JS with ResizeObserver scroll hint logic
+2. Updated CSS with sidebar min-height guard and print styles
+3. Updated Export PDF function with forced desktop-width rendering
+4. Confirm desktop layout unchanged after fixes
+
+---
+
+Paste this with your code files attached and it will close all remaining gaps from the previous fix session.

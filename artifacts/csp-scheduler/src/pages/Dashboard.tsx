@@ -78,7 +78,7 @@ export default function Dashboard() {
         <div className="flex flex-col md:flex-row flex-1 min-h-0 overflow-y-auto md:overflow-hidden">
 
           {/* ── LEFT SIDEBAR ── */}
-          <aside className="w-full md:w-[420px] shrink-0 flex flex-col border-b md:border-b-0 md:border-r border-white/6 bg-black/10 backdrop-blur-sm max-h-[45dvh] md:max-h-none">
+          <aside className="sidebar w-full md:w-[420px] shrink-0 flex flex-col border-b md:border-b-0 md:border-r border-white/6 bg-black/10 backdrop-blur-sm max-h-[45dvh] md:max-h-none">
 
             {/* Solver Config card */}
             <div className="px-5 pt-5 shrink-0">
@@ -182,7 +182,7 @@ export default function Dashboard() {
           </aside>
 
           {/* ── RIGHT MAIN PANEL ── */}
-          <main className="flex-1 flex flex-col overflow-y-auto custom-scrollbar">
+          <main className="main-panel flex-1 flex flex-col overflow-y-auto custom-scrollbar">
             <div className="flex-1 flex flex-col gap-5 p-6">
 
               {isPending ? (

@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Download, ChevronLeft, ChevronRight } from "lucide-react";
 import html2canvas from "html2canvas";
@@ -16,7 +16,19 @@ const ALL_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Satur
 
 export const TimetableGrid = ({ solutions, currentSolutionIdx, setSolutionIdx }: Props) => {
   const gridRef = useRef<HTMLDivElement>(null);
-  
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const observer = new ResizeObserver(() => {
+      const needsScroll = container.scrollWidth > container.clientWidth;
+      container.classList.toggle('show-scroll-hint', needsScroll);
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [solutions, currentSolutionIdx]);
+
   if (!solutions || solutions.length === 0) return null;
   const currentSolution = solutions[currentSolutionIdx];
 
@@ -29,8 +41,13 @@ export const TimetableGrid = ({ solutions, currentSolutionIdx, setSolutionIdx }:
 
   const exportPDF = async () => {
     if (!gridRef.current) return;
+    const el = gridRef.current;
+    const prevMinWidth = el.style.minWidth;
+    const prevWidth = el.style.width;
     try {
-      const canvas = await html2canvas(gridRef.current, { backgroundColor: '#0a0b0f', scale: 2 });
+      el.style.minWidth = '800px';
+      el.style.width = '800px';
+      const canvas = await html2canvas(el, { backgroundColor: '#0a0b0f', scale: 2 });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('l', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -39,6 +56,9 @@ export const TimetableGrid = ({ solutions, currentSolutionIdx, setSolutionIdx }:
       pdf.save(`timecraft-schedule-${currentSolutionIdx + 1}.pdf`);
     } catch (err) {
       console.error("PDF generation failed", err);
+    } finally {
+      el.style.minWidth = prevMinWidth;
+      el.style.width = prevWidth;
     }
   };
 
@@ -79,7 +99,7 @@ export const TimetableGrid = ({ solutions, currentSolutionIdx, setSolutionIdx }:
       </div>
       
       {/* Grid */}
-      <div className="timetable-container p-5 overflow-auto flex-1 custom-scrollbar">
+      <div ref={containerRef} className="timetable-container p-5 overflow-auto flex-1 custom-scrollbar">
         <div ref={gridRef} className="timetable-table p-4 rounded-2xl bg-black/30 border border-white/[0.05]">
           <div 
             className="grid gap-2" 

@@ -757,14 +757,24 @@
       min-width: 40px;
     }
 
-    .timetable-container::after {
-      content: '\2190 scroll \2192';
-      display: block;
-      text-align: center;
-      font-size: 11px;
-      color: #888;
-      padding: 4px 0;
+    .timetable-panel,
+    .main-panel {
+      min-height: 300px;
+      flex: 1;
     }
+
+    .sidebar {
+      max-height: min(45dvh, calc(100dvh - 320px));
+    }
+  }
+
+  .timetable-container.show-scroll-hint::after {
+    content: '\2190 scroll \2192';
+    display: block;
+    text-align: center;
+    font-size: 11px;
+    color: #888;
+    padding: 4px 0;
   }
 }
 
@@ -840,4 +850,23 @@
   .export-btn,
   .add-btn,
   .icon-btn { will-change: auto; }
+}
+
+/* ══════════════════════════════════════════
+   PRINT STYLES
+   Forces the timetable to render at a fixed
+   desktop width for consistent PDF/print output
+══════════════════════════════════════════ */
+@media print {
+  .timetable-container {
+    overflow: visible !important;
+    width: 100% !important;
+  }
+  .timetable-table {
+    min-width: 800px !important;
+    width: 100% !important;
+  }
+  .sidebar {
+    display: none !important;
+  }
 }
