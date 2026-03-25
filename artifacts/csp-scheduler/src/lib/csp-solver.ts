@@ -6,7 +6,7 @@ import type {
   CspResponse,
   TimetableEntry,
   SolvingStep,
-} from "@workspace/api-client-react";
+} from "@/lib/types";
 
 function shuffle<T>(array: T[]): T[] {
   const arr = [...array];

@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, XCircle, Zap, FastForward } from "lucide-react";
-import type { SolvingStep } from "@workspace/api-client-react";
+import type { SolvingStep } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export const SolvingTrace = ({ steps }: { steps?: SolvingStep[] }) => {

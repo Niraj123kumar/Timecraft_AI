@@ -3,7 +3,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSchedulerStore } from "@/store/use-scheduler";
 import { Plus, Trash2, Users, BookOpen, MapPin, Clock, ChevronDown } from "lucide-react";
-import { TimeSlotDay } from "@workspace/api-client-react";
+import { TimeSlotDay } from "@/lib/types";
 
 interface FormSectionProps {
   title: string;

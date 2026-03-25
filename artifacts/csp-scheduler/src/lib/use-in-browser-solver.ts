@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import type { CspResponse } from "@workspace/api-client-react";
+import type { CspResponse } from "@/lib/types";
 import { solveCsp, type CspInput } from "./csp-solver";
 
 interface MutateArgs {

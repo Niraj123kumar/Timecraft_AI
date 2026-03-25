@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Download, ChevronLeft, ChevronRight } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import type { TimetableEntry } from "@workspace/api-client-react";
+import type { TimetableEntry } from "@/lib/types";
 import { generateColorFromString, generateDarkerColorFromString } from "@/lib/utils";
 
 interface Props {

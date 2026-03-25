@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { v4 as uuidv4 } from "uuid";
-import type { Subject, Teacher, Room, TimeSlot } from "@workspace/api-client-react";
+import type { Subject, Teacher, Room, TimeSlot } from "@/lib/types";
 
 // Extending the generated types locally for form management, before sending to API
 export interface StoreState {

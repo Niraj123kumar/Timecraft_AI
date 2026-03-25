@@ -1,5 +1,5 @@
 import { Activity, Clock, RotateCcw, Zap, type LucideIcon } from "lucide-react";
-import type { SolverStats } from "@workspace/api-client-react";
+import type { SolverStats } from "@/lib/types";
 
 interface StatCardProps {
   icon: LucideIcon;
