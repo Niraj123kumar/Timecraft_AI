@@ -145,15 +145,15 @@ return (
                   <FieldLabel>Teacher</FieldLabel>
                   <input
   placeholder="Enter or select teacher"
-  value={subject.teacher}
-  onChange={(e) => updateSubject(i, "teacher", e.target.value)}
+  value={s.teacher}
+  onChange={(e) => updateSubject(s.id, { teacher: e.target.value })}
 />
 
 <div>
   {teachers.map((t, index) => (
     <div
       key={index}
-      onClick={() => updateSubject(i, "teacher", t)}
+      onClick={() => updateSubject(s.id, { teacher: t })}
       style={{ cursor: "pointer" }}
     >
       {t}
@@ -361,15 +361,15 @@ return (
           <FieldLabel>Day</FieldLabel>
           <input
   placeholder="Enter or select teacher"
-  value={subject.teacher}
-  onChange={(e) => updateSubject(i, "teacher", e.target.value)}
+  value={s.teacher}
+  onChange={(e) => updateSubject(s.id, { teacher: e.target.value })}
 />
 
 <div>
   {teachers.map((t, index) => (
     <div
       key={index}
-      onClick={() => updateSubject(i, "teacher", t)}
+      onClick={() => updateSubject(s.id, { teacher: t })}
       style={{ cursor: "pointer" }}
     >
       {t}

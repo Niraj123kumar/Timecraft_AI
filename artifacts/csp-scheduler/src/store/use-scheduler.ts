@@ -40,7 +40,7 @@ export const useSchedulerStore = create<StoreState>((set) => ({
 
   addSubject: (s) =>
     set((state) => ({
-      subjects: [...state.subjects, { ...s, id: uuidv4() }],
+      subjects: [],
     })),
 
   updateSubject: (id, updates) =>
@@ -57,7 +57,7 @@ export const useSchedulerStore = create<StoreState>((set) => ({
 
   addTeacher: (t) =>
     set((state) => ({
-      teachers: [...state.teachers, { ...t, id: uuidv4() }],
+      teachers: [],
     })),
 
   updateTeacher: (id, t) =>
@@ -74,7 +74,7 @@ export const useSchedulerStore = create<StoreState>((set) => ({
 
   addRoom: (r) =>
     set((state) => ({
-      rooms: [...state.rooms, { ...r, id: uuidv4() }],
+      rooms: [],
     })),
 
   updateRoom: (id, r) =>
@@ -91,7 +91,7 @@ export const useSchedulerStore = create<StoreState>((set) => ({
 
   addTimeSlot: (ts) =>
     set((state) => ({
-      timeSlots: [...state.timeSlots, { ...ts, id: uuidv4() }],
+      timeSlots: [],
     })),
 
   removeTimeSlot: (id) =>
