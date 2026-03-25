@@ -7,6 +7,7 @@ import type {
   TimetableEntry,
   SolvingStep,
 } from "@workspace/api-client-react";
+
 function shuffle<T>(array: T[]): T[] {
   const arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {
@@ -18,7 +19,6 @@ function shuffle<T>(array: T[]): T[] {
 
 type Variable = readonly [string, number];
 type Value = readonly [string, string];
-
 type DomainMap = Map<string, Value[]>;
 
 function varKey(v: Variable): string {
@@ -75,6 +75,7 @@ export function solveCsp(input: CspInput): CspResponse {
       throw new Error(
         `Subject '${subj.name}' references teacher ID '${subj.teacherId}' which does not exist.`
       );
+    }
   }
 
   const stats = { assignments: 0, backtracks: 0, propagations: 0 };
@@ -100,13 +101,12 @@ export function solveCsp(input: CspInput): CspResponse {
         : new Set(timeSlotsMap.keys());
 
     const domain: Value[] = [];
-const shuffledSlots = shuffle([...allowedSlotIds]);
-
-for (const tsId of shuffledSlots) {
-  for (const r of rooms) {
-    domain.push([tsId, r.id] as const);
-  }
-}
+    const shuffledSlots = shuffle([...allowedSlotIds]);
+    for (const tsId of shuffledSlots) {
+      for (const r of rooms) {
+        domain.push([tsId, r.id] as const);
+      }
+    }
     initialDomains.set(varKey(v), shuffle(domain));
   }
 
@@ -134,8 +134,7 @@ for (const tsId of shuffledSlots) {
     });
   }
 
-
-function isConsistent(
+  function isConsistent(
     assignment: Map<string, Value>,
     v: Variable,
     value: Value,
@@ -158,18 +157,12 @@ function isConsistent(
     const domI = domains.get(keyI) ?? [];
     const toRemove: Value[] = [];
     for (const valI of domI) {
-      const hasSupport = domJ.some(
-        (valJ) => !conflicts(subjI, valI, subjJ, valJ)
-      );
+      const hasSupport = domJ.some((valJ) => !conflicts(subjI, valI, subjJ, valJ));
       if (!hasSupport) {
         toRemove.push(valI);
       }
     }
-      }
-    }
-
     if (toRemove.length === 0) return false;
-
     const newDomI = domI.filter((v) => !toRemove.includes(v));
     domains.set(keyI, newDomI);
     stats.propagations += toRemove.length;
@@ -195,14 +188,12 @@ function isConsistent(
         }
       }
     }
-
     let head = 0;
     while (head < queue.length) {
       const [varI, varJ] = queue[head++];
       const keyI = varKey(varI);
       const keyJ = varKey(varJ);
       if (!domains.has(keyI) || !domains.has(keyJ)) continue;
-
       if (revise(domains, varI, varJ)) {
         if ((domains.get(keyI) ?? []).length === 0) return false;
         for (const varK of variables) {
@@ -225,11 +216,9 @@ function isConsistent(
     const subj = subjectsMap.get(v[0])!;
     const newDomains = cloneDomains(domains);
     const vKey = varKey(v);
-
     for (const other of variables) {
       const otherKey = varKey(other);
       if (assignment.has(otherKey) || otherKey === vKey) continue;
-
       const otherSubj = subjectsMap.get(other[0])!;
       const filtered = (newDomains.get(otherKey) ?? []).filter(
         (val) => !conflicts(subj, value, otherSubj, val)
@@ -237,13 +226,11 @@ function isConsistent(
       const removed = (newDomains.get(otherKey) ?? []).length - filtered.length;
       stats.propagations += removed;
       newDomains.set(otherKey, filtered);
-
       if (filtered.length === 0) return [false, newDomains];
     }
-
     const unassigned = variables.filter(
       (other) => !assignment.has(varKey(other)) && varKey(other) !== vKey,
-      );
+    );
     if (unassigned.length > 0) {
       const ac3Domains = cloneDomains(newDomains);
       const feasible = ac3(ac3Domains, [v]);
@@ -253,7 +240,6 @@ function isConsistent(
         newDomains.set(uk, ac3Domains.get(uk) ?? []);
       }
     }
-
     return [true, newDomains];
   }
 
@@ -262,23 +248,18 @@ function isConsistent(
     domains: DomainMap,
   ): Variable {
     const unassigned = variables.filter((v) => !assignment.has(varKey(v)));
-
     function degree(v: Variable): number {
       const subj = subjectsMap.get(v[0])!;
       let count = 0;
       for (const other of unassigned) {
         if (varKey(other) === varKey(v)) continue;
         const otherSubj = subjectsMap.get(other[0])!;
-        if (
-          otherSubj.teacherId === subj.teacherId ||
-          otherSubj.id === subj.id
-        ) {
+        if (otherSubj.teacherId === subj.teacherId || otherSubj.id === subj.id) {
           count++;
         }
       }
       return count;
     }
-
     return unassigned.sort((a, b) => {
       const domA = (domains.get(varKey(a)) ?? []).length;
       const domB = (domains.get(varKey(b)) ?? []).length;
@@ -295,7 +276,6 @@ function isConsistent(
     const subj = subjectsMap.get(v[0])!;
     const vKey = varKey(v);
     const dom = domains.get(vKey) ?? [];
-
     function constraintCount(value: Value): number {
       let count = 0;
       for (const other of variables) {
@@ -308,7 +288,6 @@ function isConsistent(
       }
       return count;
     }
-
     return [...dom].sort((a, b) => constraintCount(a) - constraintCount(b));
   }
 
@@ -316,19 +295,27 @@ function isConsistent(
     const entries: TimetableEntry[] = [];
     for (const [key, value] of assignment) {
       const [subjId] = key.split("#");
+      const [tsId, roomId] = value;
       const subj = subjectsMap.get(subjId)!;
       const teacher = teachersMap.get(subj.teacherId)!;
       const ts = timeSlotsMap.get(tsId)!;
+      const room = roomsMap.get(roomId)!;
       entries.push({
         subjectId: subjId,
         subjectName: subj.name,
         teacherId: subj.teacherId,
         teacherName: teacher.name,
+        timeSlotId: tsId,
+        day: ts.day,
+        time: ts.time,
+        roomId,
+        roomName: room.name,
       });
     }
     return entries.sort((a, b) =>
       a.day !== b.day ? a.day.localeCompare(b.day) : a.time.localeCompare(b.time)
     );
+  }
 
   function backtrack(
     assignment: Map<string, Value>,
@@ -336,57 +323,20 @@ function isConsistent(
     solutions: TimetableEntry[][],
   ): void {
     if (solutions.length >= maxSolutions) return;
-
     if (assignment.size === variables.length) {
       solutions.push(buildSolution(assignment));
       return;
     }
-
     const v = selectUnassigned(assignment, domains);
     const vKey = varKey(v);
     const [, sessionIdx] = v;
     const subj = subjectsMap.get(v[0])!;
-
     for (const value of orderDomainValues(v, domains, assignment)) {
+      const [tsId, roomId] = value;
       const ts = timeSlotsMap.get(tsId)!;
+      const room = roomsMap.get(roomId)!;
       const valStr = `${ts.label ?? ts.day + " " + ts.time} in ${room.name}`;
-
       if (!isConsistent(assignment, v, value)) continue;
-
-      assignment.set(vKey, value);
-      stats.assignments++;
-      addStep(
-        "assign",
-      v,
-      valStr,
-    );
-    return entries.sort((a, b) =>
-      a.day !== b.day ? a.day.localeCompare(b.day) : a.time.localeCompare(b.time)
-    );
-
-  function backtrack(
-    assignment: Map<string, Value>,
-    domains: DomainMap,
-    solutions: TimetableEntry[][],
-  ): void {
-    if (solutions.length >= maxSolutions) return;
-
-    if (assignment.size === variables.length) {
-      solutions.push(buildSolution(assignment));
-      return;
-    }
-
-    const v = selectUnassigned(assignment, domains);
-    const vKey = varKey(v);
-    const [, sessionIdx] = v;
-    const subj = subjectsMap.get(v[0])!;
-
-    for (const value of orderDomainValues(v, domains, assignment)) {
-      const ts = timeSlotsMap.get(tsId)!;
-      const valStr = `${ts.label ?? ts.day + " " + ts.time} in ${room.name}`;
-
-      if (!isConsistent(assignment, v, value)) continue;
-
       assignment.set(vKey, value);
       stats.assignments++;
       addStep(
@@ -396,9 +346,7 @@ function isConsistent(
         `Assigned ${subj.name} (session ${sessionIdx + 1}) → ${valStr}`,
         domains,
       );
-
       const [feasible, newDomains] = forwardCheck(assignment, v, value, domains);
-
       if (feasible) {
         if (includeSteps) {
           addStep(
@@ -417,12 +365,10 @@ function isConsistent(
           valStr,
           `Domain wipe-out detected after AC-3 — pruning branch`,
           domains,
-      );
+        );
       }
-
       assignment.delete(vKey);
     }
-
     stats.backtracks++;
     addStep(
       "backtrack",
@@ -430,19 +376,16 @@ function isConsistent(
       "",
       `Backtracking from ${subj.name} (session ${sessionIdx + 1}) — no valid value`,
       domains,
-      );
+    );
   }
 
   const startMs = performance.now();
-
   const solutions: TimetableEntry[][] = [];
   const workingDomains = cloneDomains(initialDomains);
   const feasible = ac3(workingDomains);
-
   if (feasible) {
     backtrack(new Map(), workingDomains, solutions);
   }
-
   const elapsedMs = performance.now() - startMs;
 
   return {
@@ -461,6 +404,4 @@ function isConsistent(
         ? `Found ${solutions.length} solution(s)`
         : "No valid schedule found. Try adding more time slots, rooms, or adjusting constraints.",
   };
-}
-}
 }
