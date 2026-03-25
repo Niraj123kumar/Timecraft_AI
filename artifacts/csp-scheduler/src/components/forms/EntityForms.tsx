@@ -1,6 +1,7 @@
 import { type ReactNode } from "react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useShallow } from "zustand/shallow";
 import { useSchedulerStore } from "@/store/use-scheduler";
 import { Plus, Trash2, Users, BookOpen, MapPin, Clock, ChevronDown } from "lucide-react";
 import { TimeSlotDay } from "@workspace/api-client-react";
@@ -13,15 +14,19 @@ interface FormSectionProps {
   accent: string;
 }
 
+/* ══════════════════════════════════════
+   FORM SECTION (Collapsible Card)
+══════════════════════════════════════ */
 const FormSection = ({ title, icon: Icon, children, count, accent }: FormSectionProps) => {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
     <div className="form-card fade-in">
-      {/* Card header / toggle */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-5 py-4 hover:bg-white/[0.03] transition-colors duration-150 group rounded-2xl"
+        aria-expanded={isOpen}
+        className="w-full flex items-center justify-between px-5 py-4 hover:bg-white/[0.03] transition-colors duration-150 group rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/10"
+        type="button"
       >
         <div className="flex items-center gap-3">
           <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${accent}`}>
@@ -41,15 +46,15 @@ const FormSection = ({ title, icon: Icon, children, count, accent }: FormSection
         </div>
       </button>
 
-      {/* Collapsible body — grows naturally, sidebar scrolls as one unit */}
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
             key="body"
-            initial={{ height: 0, opacity: 0, overflow: "hidden" }}
-            animate={{ height: "auto", opacity: 1, overflow: "visible" }}
-            exit={{ height: 0, opacity: 0, overflow: "hidden" }}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.22, ease: "easeInOut" }}
+            className="overflow-hidden"
           >
             <div className="px-5 pb-5 pt-3 border-t border-white/[0.07] flex flex-col gap-3">
               {children}
@@ -61,36 +66,52 @@ const FormSection = ({ title, icon: Icon, children, count, accent }: FormSection
   );
 };
 
-/* ── Shared classes ── */
+/* ══════════════════════════════════════
+   SHARED CLASSES
+══════════════════════════════════════ */
 const inputCls = "glass-input w-full";
 const numInputCls = "glass-input w-full text-center";
 const selectCls = "glass-input w-full";
 
-/* ── Field label ── */
+/* ══════════════════════════════════════
+   FIELD LABEL
+══════════════════════════════════════ */
 const FieldLabel = ({ children }: { children: ReactNode }) => (
   <span className="field-label">{children}</span>
 );
 
-/* ── Delete button ── */
+/* ══════════════════════════════════════
+   DELETE BUTTON
+══════════════════════════════════════ */
 const DeleteBtn = ({ onClick, title }: { onClick: () => void; title: string }) => (
-  <button onClick={onClick} title={title} className="icon-btn">
+  <button onClick={onClick} title={title} className="icon-btn" type="button">
     <Trash2 size={15} />
   </button>
 );
 
-/* ── Add button ── */
+/* ══════════════════════════════════════
+   ADD BUTTON
+══════════════════════════════════════ */
 const AddButton = ({ onClick, label }: { onClick: () => void; label: string }) => (
-  <button onClick={onClick} className="add-btn">
+  <button onClick={onClick} className="add-btn" type="button">
     <Plus size={14} />
     {label}
   </button>
 );
 
 /* ══════════════════════════════════════
-   SUBJECTS
+   SUBJECTS FORM
 ══════════════════════════════════════ */
 export const SubjectsForm = () => {
-  const { subjects, teachers, addSubject, updateSubject, removeSubject } = useSchedulerStore();
+  const { subjects, teachers, addSubject, updateSubject, removeSubject } = useSchedulerStore(
+    useShallow((state) => ({
+      subjects: state.subjects,
+      teachers: state.teachers,
+      addSubject: state.addSubject,
+      updateSubject: state.updateSubject,
+      removeSubject: state.removeSubject,
+    }))
+  );
 
   return (
     <FormSection
@@ -111,9 +132,8 @@ export const SubjectsForm = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.97 }}
               transition={{ duration: 0.15 }}
-              className={`subject-item p-3 flex flex-col gap-2.5 ${warn ? "warn" : ""}`}
+              className={`subject-item flex flex-col gap-2.5 ${warn ? "warn" : ""}`}
             >
-              {/* Row 1: Subject Name + Delete */}
               <div>
                 <FieldLabel>Subject Name</FieldLabel>
                 <div className="flex items-center gap-2">
@@ -127,7 +147,6 @@ export const SubjectsForm = () => {
                 </div>
               </div>
 
-              {/* Row 2: Teacher (flex) + Sessions (fixed) */}
               <div className="flex gap-2">
                 <div className="flex-1 min-w-0">
                   <FieldLabel>Teacher</FieldLabel>
@@ -153,14 +172,21 @@ export const SubjectsForm = () => {
                     min="1"
                     max="10"
                     value={s.sessionsPerWeek}
-                    onChange={(e) => updateSubject(s.id, { sessionsPerWeek: parseInt(e.target.value) || 1 })}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      if (!isNaN(val) && val >= 1) {
+                        updateSubject(s.id, { sessionsPerWeek: val });
+                      }
+                    }}
                     className={numInputCls}
                   />
                 </div>
               </div>
 
               {warn && (
-                <p className="text-xs text-destructive/90 font-medium">Teacher no longer exists — please reassign.</p>
+                <p className="text-xs text-destructive/90 font-medium">
+                  Teacher no longer exists — please reassign.
+                </p>
               )}
             </motion.div>
           );
@@ -168,7 +194,13 @@ export const SubjectsForm = () => {
       </AnimatePresence>
 
       <AddButton
-        onClick={() => addSubject({ name: "", teacherId: teachers[0]?.id || "", sessionsPerWeek: 2 })}
+        onClick={() =>
+          addSubject({
+            name: "",
+            teacherId: teachers[0]?.id || "",
+            sessionsPerWeek: 2,
+          })
+        }
         label="Add Subject"
       />
     </FormSection>
@@ -176,10 +208,17 @@ export const SubjectsForm = () => {
 };
 
 /* ══════════════════════════════════════
-   TEACHERS
+   TEACHERS FORM
 ══════════════════════════════════════ */
 export const TeachersForm = () => {
-  const { teachers, addTeacher, updateTeacher, removeTeacher } = useSchedulerStore();
+  const { teachers, addTeacher, updateTeacher, removeTeacher } = useSchedulerStore(
+    useShallow((state) => ({
+      teachers: state.teachers,
+      addTeacher: state.addTeacher,
+      updateTeacher: state.updateTeacher,
+      removeTeacher: state.removeTeacher,
+    }))
+  );
 
   return (
     <FormSection
@@ -210,16 +249,26 @@ export const TeachersForm = () => {
           </motion.div>
         ))}
       </AnimatePresence>
-      <AddButton onClick={() => addTeacher({ name: "", availableSlots: [] })} label="Add Teacher" />
+      <AddButton
+        onClick={() => addTeacher({ name: "", availableSlots: [] })}
+        label="Add Teacher"
+      />
     </FormSection>
   );
 };
 
 /* ══════════════════════════════════════
-   ROOMS
+   ROOMS FORM
 ══════════════════════════════════════ */
 export const RoomsForm = () => {
-  const { rooms, addRoom, updateRoom, removeRoom } = useSchedulerStore();
+  const { rooms, addRoom, updateRoom, removeRoom } = useSchedulerStore(
+    useShallow((state) => ({
+      rooms: state.rooms,
+      addRoom: state.addRoom,
+      updateRoom: state.updateRoom,
+      removeRoom: state.removeRoom,
+    }))
+  );
 
   return (
     <FormSection
@@ -253,7 +302,12 @@ export const RoomsForm = () => {
                 type="number"
                 min="1"
                 value={r.capacity}
-                onChange={(e) => updateRoom(r.id, { capacity: parseInt(e.target.value) || 1 })}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value);
+                  if (!isNaN(val) && val >= 1) {
+                    updateRoom(r.id, { capacity: val });
+                  }
+                }}
                 className={numInputCls}
                 placeholder="30"
               />
@@ -270,20 +324,30 @@ export const RoomsForm = () => {
 };
 
 /* ══════════════════════════════════════
-   TIME SLOTS
+   TIME SLOTS FORM
 ══════════════════════════════════════ */
 const DAYS = Object.values(TimeSlotDay);
 
 export const TimeSlotsForm = () => {
-  const { timeSlots, addTimeSlot, removeTimeSlot } = useSchedulerStore();
+  const { timeSlots, addTimeSlot, removeTimeSlot } = useSchedulerStore(
+    useShallow((state) => ({
+      timeSlots: state.timeSlots,
+      addTimeSlot: state.addTimeSlot,
+      removeTimeSlot: state.removeTimeSlot,
+    }))
+  );
   const [newDay, setNewDay] = useState<TimeSlotDay>(TimeSlotDay.Monday);
   const [newTime, setNewTime] = useState("09:00");
 
   const handleAdd = () => {
     const t = newTime.trim();
     if (!t || !newDay) return;
-    if (timeSlots.some((ts) => ts.day === newDay && ts.time === t)) return;
+    if (timeSlots.some((ts) => ts.day === newDay && ts.time === t)) {
+      alert("This time slot already exists!");
+      return;
+    }
     addTimeSlot({ day: newDay, time: t, label: `${newDay} ${t}` });
+    setNewTime("09:00");
   };
 
   return (
@@ -293,7 +357,6 @@ export const TimeSlotsForm = () => {
       count={timeSlots.length}
       accent="text-warning bg-warning/20"
     >
-      {/* Existing slots */}
       <AnimatePresence>
         {timeSlots.map((ts) => (
           <motion.div
@@ -304,15 +367,12 @@ export const TimeSlotsForm = () => {
             transition={{ duration: 0.15 }}
             className="flex items-center gap-2"
           >
-            <span className="slot-pill">
-              {ts.label ?? `${ts.day} ${ts.time}`}
-            </span>
+            <span className="slot-pill">{ts.label ?? `${ts.day} ${ts.time}`}</span>
             <DeleteBtn onClick={() => removeTimeSlot(ts.id)} title="Remove time slot" />
           </motion.div>
         ))}
       </AnimatePresence>
 
-      {/* Add new slot */}
       <div className="flex gap-2 pt-1 border-t border-white/[0.07] mt-1">
         <div className="flex-1 min-w-0">
           <FieldLabel>Day</FieldLabel>
@@ -343,6 +403,7 @@ export const TimeSlotsForm = () => {
             onClick={handleAdd}
             className="icon-btn border border-primary/30 text-primary hover:text-white hover:bg-primary/20 hover:border-primary/60"
             title="Add slot"
+            type="button"
           >
             <Plus size={15} />
           </button>
