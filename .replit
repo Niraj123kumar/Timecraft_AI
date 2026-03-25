@@ -12,6 +12,3 @@ externalPort = 80
 [[ports]]
 localPort = 5173
 externalPort = 5173
-
-[run]
-command = "cd artifacts/csp-scheduler && pnpm run dev"

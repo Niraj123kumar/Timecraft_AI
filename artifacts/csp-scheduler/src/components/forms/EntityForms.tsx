@@ -16,7 +16,11 @@ interface FormSectionProps {
 const FormSection = ({ title, icon: Icon, children, count, accent }: FormSectionProps) => {
   const [isOpen, setIsOpen] = useState(true);
 
-  return (
+  
+
+
+
+return (
     <div className="form-card fade-in">
       {/* Card header / toggle */}
       <button
@@ -92,7 +96,11 @@ const AddButton = ({ onClick, label }: { onClick: () => void; label: string }) =
 export const SubjectsForm = () => {
   const { subjects, teachers, addSubject, updateSubject, removeSubject } = useSchedulerStore();
 
-  return (
+  
+
+
+
+return (
     <FormSection
       title="Subjects"
       icon={BookOpen}
@@ -104,7 +112,11 @@ export const SubjectsForm = () => {
           const hasTeacher = !!teachers.find((t) => t.id === s.teacherId);
           const warn = s.teacherId && !hasTeacher;
 
-          return (
+          
+
+
+
+return (
             <motion.div
               key={s.id}
               initial={{ opacity: 0, y: -6 }}
@@ -131,7 +143,26 @@ export const SubjectsForm = () => {
               <div className="flex gap-2">
                 <div className="flex-1 min-w-0">
                   <FieldLabel>Teacher</FieldLabel>
-                  <select
+                  <input
+  placeholder="Enter or select teacher"
+  value={subject.teacher}
+  onChange={(e) => updateSubject(i, "teacher", e.target.value)}
+/>
+
+<div>
+  {teachers.map((t, index) => (
+    <div
+      key={index}
+      onClick={() => updateSubject(i, "teacher", t)}
+      style={{ cursor: "pointer" }}
+    >
+      {t}
+    </div>
+  ))}
+</div>
+
+// OLD SELECT REMOVED
+<select
                     value={s.teacherId}
                     onChange={(e) => updateSubject(s.id, { teacherId: e.target.value })}
                     className={selectCls}
@@ -181,7 +212,11 @@ export const SubjectsForm = () => {
 export const TeachersForm = () => {
   const { teachers, addTeacher, updateTeacher, removeTeacher } = useSchedulerStore();
 
-  return (
+  
+
+
+
+return (
     <FormSection
       title="Teachers"
       icon={Users}
@@ -221,7 +256,11 @@ export const TeachersForm = () => {
 export const RoomsForm = () => {
   const { rooms, addRoom, updateRoom, removeRoom } = useSchedulerStore();
 
-  return (
+  
+
+
+
+return (
     <FormSection
       title="Rooms"
       icon={MapPin}
@@ -286,7 +325,11 @@ export const TimeSlotsForm = () => {
     addTimeSlot({ day: newDay, time: t, label: `${newDay} ${t}` });
   };
 
-  return (
+  
+
+
+
+return (
     <FormSection
       title="Time Slots"
       icon={Clock}
@@ -316,7 +359,26 @@ export const TimeSlotsForm = () => {
       <div className="flex gap-2 pt-1 border-t border-white/[0.07] mt-1">
         <div className="flex-1 min-w-0">
           <FieldLabel>Day</FieldLabel>
-          <select
+          <input
+  placeholder="Enter or select teacher"
+  value={subject.teacher}
+  onChange={(e) => updateSubject(i, "teacher", e.target.value)}
+/>
+
+<div>
+  {teachers.map((t, index) => (
+    <div
+      key={index}
+      onClick={() => updateSubject(i, "teacher", t)}
+      style={{ cursor: "pointer" }}
+    >
+      {t}
+    </div>
+  ))}
+</div>
+
+// OLD SELECT REMOVED
+<select
             value={newDay}
             onChange={(e) => setNewDay(e.target.value as TimeSlotDay)}
             className={selectCls}
