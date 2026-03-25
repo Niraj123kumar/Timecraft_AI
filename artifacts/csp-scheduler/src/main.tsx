@@ -1,6 +1,4 @@
 // Fix ResizeObserver error (mobile safe)
-const resizeObserverErr = /ResizeObserver loop/;
-
 window.addEventListener("error", (e) => {
   if (resizeObserverErr.test(e.message)) {
     e.stopImmediatePropagation();
